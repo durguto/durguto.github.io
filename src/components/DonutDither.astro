@@ -30,12 +30,21 @@
         let A = 1, B = 1;
         let hovered = false;
         let frameCount = 0;
+        let lastTime = 0;
+
+        // radians per second (frame-rate independent)
+        const SPEED_A = 1.2;
+        const SPEED_B = 0.48;
+        const HOVER_A = 7.0;
+        const HOVER_B = 3.0;
 
         const trigger = canvas.closest("[data-donut-link]") ?? canvas;
         trigger.addEventListener("mouseenter", () => hovered = true);
         trigger.addEventListener("mouseleave", () => hovered = false);
 
-        function frame() {
+        function frame(timestamp: number) {
+            const delta = lastTime === 0 ? 0 : Math.min((timestamp - lastTime) / 1000, 0.1);
+            lastTime = timestamp;
             const imageData = ctx.createImageData(W, H);
             const px = imageData.data;
             const zbuf = new Float32Array(W * H).fill(-Infinity);
@@ -98,12 +107,12 @@
                 if (link) link.href = faviconCanvas.toDataURL("image/png");
             }
 
-            A += hovered ? 0.12 : 0.02;
-            B += hovered ? 0.05 : 0.008;
+            A += (hovered ? HOVER_A : SPEED_A) * delta;
+            B += (hovered ? HOVER_B : SPEED_B) * delta;
             requestAnimationFrame(frame);
         }
 
-        frame();
+        requestAnimationFrame(frame);
     }
 
     document.querySelectorAll("[data-donut-canvas]").forEach((el) => {
