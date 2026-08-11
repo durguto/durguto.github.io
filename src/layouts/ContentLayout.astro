@@ -1,6 +1,5 @@
 ---
 import "../styles/global.css";
-import GoogleFont from "./GoogleFont.astro";
 import ThemeScript from "./ThemeScript.astro";
 import Favicon from "./Favicon.astro";
 import Sidebar from "../components/Sidebar.astro";
@@ -25,7 +24,6 @@ const formattedDate = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padSt
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <Favicon />
         <slot name="meta" />
-        <GoogleFont />
         <ThemeScript />
     </head>
 
@@ -43,7 +41,7 @@ const formattedDate = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padSt
 
             <main
                 id="main"
-                class="min-h-screen px-5 lg:px-10 pt-0 lg:border-l lg:border-dotted lg:border-[rgb(var(--color-border-subtle))]"
+                class="lg:min-h-screen px-5 lg:px-10 pt-0 lg:border-l lg:border-dotted lg:border-[rgb(var(--color-border-subtle))]"
             >
                 <section class={`blog-post ${banner ? "pt-0" : "pt-16"}`}>
                     {banner && <BannerDither src={banner} />}
@@ -84,6 +82,7 @@ const formattedDate = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padSt
             display: block;
             max-width: 42rem;
             margin: 0 auto;
+            min-height: 0;
         }
     }
 </style>

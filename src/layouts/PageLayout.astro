@@ -1,6 +1,5 @@
 ---
 import "../styles/global.css";
-import GoogleFont from "./GoogleFont.astro";
 import ThemeScript from "./ThemeScript.astro";
 import Favicon from "./Favicon.astro";
 import Sidebar from "../components/Sidebar.astro";
@@ -17,7 +16,6 @@ const { heroMobile = false } = Astro.props;
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <Favicon />
-        <GoogleFont />
         <slot name="meta" />
         <ThemeScript />
     </head>
@@ -36,7 +34,7 @@ const { heroMobile = false } = Astro.props;
 
             <main
                 id="main"
-                class="min-h-screen px-5 lg:px-10 pt-0 lg:border-l lg:border-dotted lg:border-[rgb(var(--color-border-subtle))]"
+                class="lg:min-h-screen px-5 lg:px-10 pt-0 lg:border-l lg:border-dotted lg:border-[rgb(var(--color-border-subtle))]"
             >
                 <slot name="main" />
             </main>
@@ -58,6 +56,7 @@ const { heroMobile = false } = Astro.props;
             display: block;
             max-width: 42rem;
             margin: 0 auto;
+            min-height: 0;
         }
     }
 </style>
