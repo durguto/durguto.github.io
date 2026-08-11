@@ -29,7 +29,7 @@ const postsByYear = sortedPosts.reduce((acc, post) => {
 const years = Object.keys(postsByYear).map(Number).sort((a, b) => b - a);
 ---
 
-<PageLayout>
+<PageLayout heroMobile>
   <PageMeta title={`${SITE_TITLE}`} slot="meta" />
   <Fragment slot="main">
     <Intro />

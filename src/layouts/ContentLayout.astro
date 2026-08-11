@@ -4,7 +4,6 @@ import GoogleFont from "./GoogleFont.astro";
 import ThemeScript from "./ThemeScript.astro";
 import Favicon from "./Favicon.astro";
 import Sidebar from "../components/Sidebar.astro";
-import Header from "../components/Header.astro";
 import BannerDither from "../components/BannerDither.astro";
 import TableOfContents from "../components/TableOfContents.astro";
 
@@ -31,9 +30,9 @@ const formattedDate = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padSt
     </head>
 
     <body>
-        <!-- Mobile top bar -->
-        <div class="lg:hidden border-b border-[rgb(var(--color-border-subtle))]">
-            <Header />
+        <!-- Mobile: sidebar as top bar -->
+        <div class="lg:hidden">
+            <Sidebar />
         </div>
 
         <!-- Desktop: 3-column grid -->

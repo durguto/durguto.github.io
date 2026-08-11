@@ -1,28 +1,43 @@
 ---
 import DarkModeToggle from "./DarkModeToggle.astro";
 import DonutDither from "./DonutDither.astro";
+
+interface Props {
+  mobileStyle?: "hero" | "nav";
+}
+const { mobileStyle = "nav" } = Astro.props;
+const hero = mobileStyle === "hero";
 ---
 
-<aside class="sticky top-10 flex flex-col items-end gap-6 pr-8">
+<aside class={`
+  lg:flex-col lg:items-end lg:justify-start lg:gap-6
+  lg:px-0 lg:pr-8 lg:py-0 lg:border-0 lg:sticky lg:top-10
+  flex
+  ${hero
+    ? "flex-col items-center gap-4 px-5 pt-12 pb-8"
+    : "flex-row items-center justify-between gap-3 px-5 py-3 border-b border-[rgb(var(--color-border-subtle))]"
+  }
+`}>
 
-    <!-- Profile card -->
-    <div class="flex flex-col items-end gap-3">
-        <a href="/" class="unset flex flex-col items-end gap-3 group" data-donut-link>
+    <a href="/" class={`unset flex items-center gap-4 lg:flex-col lg:items-end group ${hero ? "flex-col" : "flex-row"}`} data-donut-link>
+        <div class={`shrink-0 lg:w-[120px] lg:h-[120px] ${hero ? "w-[96px] h-[96px]" : "w-10 h-10"}`}>
             <DonutDither />
-            <div class="flex flex-col items-end gap-0.5 group-hover:opacity-60 transition-opacity duration-150">
-                <span class="text-sm font-semibold text-text-heading tracking-tight">Oğuzhan Durgut</span>
-                <span class="text-xs text-text-muted">@odurgut</span>
-            </div>
-        </a>
-        <p class="text-xs text-text-muted text-right">// software engineer</p>
+        </div>
+        <div class={`flex flex-col gap-0.5 group-hover:opacity-60 transition-opacity duration-150 lg:items-end ${hero ? "items-center text-center" : ""}`}>
+            <span class="text-sm font-semibold text-text-heading tracking-tight">Oğuzhan Durgut</span>
+            <span class="text-xs text-text-muted">@odurgut</span>
+            {hero && <span class="text-xs text-text-muted mt-1">// software engineer</span>}
+        </div>
+    </a>
+
+    <div class="flex flex-row items-center gap-4 lg:flex-col lg:items-end lg:gap-3">
+        <p class="hidden lg:block text-xs text-text-muted text-right">// software engineer</p>
         <a
             href="https://github.com/odurgut"
             target="_blank"
             class="unset text-xs text-text-muted hover:text-text-heading transition-colors duration-150"
-        >
-            GitHub ↗
-        </a>
+        >GitHub ↗</a>
+        <DarkModeToggle />
     </div>
 
-    <DarkModeToggle />
 </aside>

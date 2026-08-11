@@ -4,7 +4,11 @@ import GoogleFont from "./GoogleFont.astro";
 import ThemeScript from "./ThemeScript.astro";
 import Favicon from "./Favicon.astro";
 import Sidebar from "../components/Sidebar.astro";
-import Header from "../components/Header.astro";
+
+interface Props {
+  heroMobile?: boolean;
+}
+const { heroMobile = false } = Astro.props;
 ---
 
 <!DOCTYPE html>
@@ -19,19 +23,17 @@ import Header from "../components/Header.astro";
     </head>
 
     <body>
-        <!-- Mobile top bar -->
-        <div class="lg:hidden border-b border-[rgb(var(--color-border-subtle))]">
-            <Header />
+        <!-- Mobile: sidebar as top bar (full width, horizontal) -->
+        <div class="lg:hidden">
+            <Sidebar mobileStyle={heroMobile ? "hero" : "nav"} />
         </div>
 
         <!-- Desktop: 3-column grid (sidebar | content | spacer) -->
         <div class="page-grid">
-            <!-- Left: sidebar, right-aligned -->
             <div class="hidden lg:block">
                 <Sidebar />
             </div>
 
-            <!-- Center: content with full-height dotted left border -->
             <main
                 id="main"
                 class="min-h-screen px-5 lg:px-10 pt-0 lg:border-l lg:border-dotted lg:border-[rgb(var(--color-border-subtle))]"
@@ -39,7 +41,6 @@ import Header from "../components/Header.astro";
                 <slot name="main" />
             </main>
 
-            <!-- Right: empty spacer for symmetry -->
             <div class="hidden lg:block"></div>
         </div>
     </body>
