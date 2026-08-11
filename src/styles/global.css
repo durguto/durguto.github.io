@@ -11,82 +11,57 @@
 @layer base {
     /* light theme */
     .theme-odurgut {
-        /* Tailwind slate-900 #0f172a */
-        --color-primary-main: 15 23 42;
+        --color-primary-main: 10 10 10;
 
-        /* MY COLOR */
-        --color-my-color: 42 98 212;
-        /* Tailwind slate-900 #0f172a */
-        --color-text-body: 15 23 42;
-        /* Tailwind slate-900 #0f172a */
-        --color-text-heading: 15 23 42;
-        /* Tailwind slate-900 #0f172a */
-        --color-text-bold: 15 23 42;
-        /* Tailwind slate-900 #0f172a */
-        --color-text-muted: 100 116 139;
-        /* #339af0 */
-        --color-text-link: 51 154 240;
-        /* black */
-        --color-text-code: 0 0 0;
-        /* black */
-        --color-text-selection: 0 0 0;
+        --color-my-color: 10 10 10;
+        --color-text-body: 28 28 28;
+        --color-text-heading: 0 0 0;
+        --color-text-bold: 10 10 10;
+        --color-text-muted: 115 115 115;
+        --color-text-link: 10 10 10;
+        --color-text-code: 10 10 10;
+        --color-text-selection: 255 255 255;
 
-        /* white */
         --color-bg-body: 255 255 255;
-        /* Tailwind amber-100 #fef3c7 */
-        --color-bg-code: 254 243 199;
-        /* --color-bg-code: 31 38 49; */
-        /* Tailwind primary-200 #e2e8f0 */
-        --color-bg-selection: 226 232 240;
+        --color-bg-code: 245 245 245;
+        --color-bg-selection: 10 10 10;
 
-        /* primary-100 */
-        --color-border-code: 244 244 245;
+        --color-border-code: 228 228 228;
+        --color-border-subtle: 235 235 235;
+        --color-bg-card: 250 250 250;
     }
 
     /* dark theme */
     .theme-odurgut.dark {
-        /* white */
         --color-primary-main: 255 255 255;
 
-        /* MY COLOR */
-        --color-my-color: 42 141 212;
-        /* Tailwind neutral-200 #e5e5e5 */
-        --color-text-body: 229 229 229;
-        /* white */
+        --color-my-color: 200 200 200;
+        --color-text-body: 200 200 200;
         --color-text-heading: 255 255 255;
-        /* white */
-        --color-text-bold: 255 255 255;
-        /* Tailwind neutral-300 #d4d4d4 */
-        --color-text-muted: 212 212 212;
-        /* #339af0 */
-        --color-text-link: 51 154 240;
-        /* black */
-        --color-text-code: 255 255 255;
-        /* black */
-        --color-text-selection: 0 0 0;
+        --color-text-bold: 240 240 240;
+        --color-text-muted: 120 120 120;
+        --color-text-link: 220 220 220;
+        --color-text-code: 220 220 220;
+        --color-text-selection: 10 10 10;
 
-        /* Tailwind neutral-900 #171717 */
-        /* --color-bg-body: 38 38 38; */
-        --color-bg-body: 28 29 29;
-        /* Tailwind yellow-500 #eab308 */
-        /* --color-bg-code: 234 179 8; */
-        --color-bg-code: 31 38 49;
-        /* white */
-        --color-bg-selection: 255 255 255;
+        --color-bg-body: 10 10 10;
+        --color-bg-code: 24 24 24;
+        --color-bg-selection: 220 220 220;
 
-        /* Tailwind primary-700 #404040 */
-        --color-border-code: 64 64 64;
+        --color-border-code: 40 40 40;
+        --color-border-subtle: 30 30 30;
+        --color-bg-card: 17 17 17;
     }
 
     :root {
         font-family: theme("fontFamily.body");
         background-color: theme("colors.bg.body");
         color: theme("colors.text.body");
-        line-height: 1.9;
-        line-height: 2;
+        line-height: 1.7;
         scroll-behavior: smooth;
-        /* smoother color transition on theme toggle */
-        transition: background-color 0.3s ease;
+        transition: background-color 0.2s ease;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
 
     h1,
@@ -118,34 +93,29 @@
     a:not(.unset) {
         text-decoration: none;
         background-repeat: no-repeat;
-        background-size: 100% 2px;
+        background-size: 100% 1px;
         background-position: 0 100%;
         background-image: linear-gradient(
             to right,
-            theme("colors.text.link"),
-            theme("colors.text.link")
+            rgb(var(--color-border-code)),
+            rgb(var(--color-border-code))
         );
+        transition: opacity 0.15s ease;
     }
 
     a:not(.unset):hover {
-        transition: 0;
-        color: theme("colors.text.link");
-        background-image: linear-gradient(
-            to right,
-            theme("colors.text.link"),
-            theme("colors.text.link")
-        );
+        opacity: 0.6;
     }
 
     code:not(pre code):not(.unset) {
         background-color: theme("colors.bg.code");
         color: theme("colors.text.code");
-        padding: 0.125rem 0.25rem;
+        padding: 0.1rem 0.3rem;
         border-radius: 0.25rem;
-        font-size: 0.875em;
-        font-weight: 600;
+        font-size: 0.8125em;
+        font-weight: 500;
         border: 1px solid theme("colors.border.code");
-        margin-bottom: 1.25em;
+        font-family: ui-monospace, "SF Mono", monospace;
     }
 
     html.dark code:not(pre code) {
@@ -192,20 +162,35 @@
     /* ------ GLOBAL STYLES - END ------ */
 
     /* ------ REUSABLE UTILS - START ------ */
+    .post-content {
+        font-size: 0.9375rem;
+    }
+
+    .post-content h2 {
+        font-size: 1.0625rem;
+        font-weight: 600;
+    }
+
+    .post-content h3 {
+        font-size: 0.9375rem;
+        font-weight: 600;
+    }
+
     .animated-link {
         position: relative;
-        box-decoration-break: clone;
         text-decoration: none;
-        transition: color 0.25s;
+        font-size: 0.75rem;
+        color: rgb(var(--color-text-muted));
+        transition: color 0.15s ease;
     }
 
     .animated-link:hover {
-        color: rgb(var(--color-my-color));
-        transition: color 0.25s;
+        color: rgb(var(--color-text-heading));
     }
 
     .animated-link.show {
-        color: rgb(var(--color-my-color));
+        color: rgb(var(--color-text-heading));
+        font-weight: 500;
     }
 
     /* ------ REUSABLE UTILS - END ------ */

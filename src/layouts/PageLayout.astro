@@ -1,53 +1,62 @@
 ---
-/* 
-  This layout is used in 
-  - pages/index.astro
-  - pages/blog.astro
-  - pages/projects.astro
-*/
-
-// Import the global.css file here so that it is included on
 import "../styles/global.css";
-import FontAwesome from "./FontAwesome.astro";
 import GoogleFont from "./GoogleFont.astro";
 import ThemeScript from "./ThemeScript.astro";
 import Favicon from "./Favicon.astro";
+import Sidebar from "../components/Sidebar.astro";
 import Header from "../components/Header.astro";
-import Footer from "../components/Footer.astro";
 ---
 
 <!DOCTYPE html>
 <html class="theme-odurgut" lang="en">
     <head>
-        <!-- Global Metadata -->
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <Favicon />
         <GoogleFont />
         <slot name="meta" />
         <ThemeScript />
-        <FontAwesome />
     </head>
 
-    <body class="max-w-3xl mx-auto min-h-screen px-6 sm:px-8">
-        <Header />
-        <main id="main">
-            <slot name="main" />
-        </main>
-        <Footer />
-        <style>
-            body {
-                display: grid;
-                grid-template-areas:
-                    "header"
-                    "main"
-                    "footer";
-                grid-template-rows: 5rem minmax(0, 1fr) 5rem;
-                grid-template-columns: minmax(0, 1fr);
-            }
-            main {
-                grid-area: main;
-            }
-        </style>
+    <body>
+        <!-- Mobile top bar -->
+        <div class="lg:hidden border-b border-[rgb(var(--color-border-subtle))]">
+            <Header />
+        </div>
+
+        <!-- Desktop: 3-column grid (sidebar | content | spacer) -->
+        <div class="page-grid">
+            <!-- Left: sidebar, right-aligned -->
+            <div class="hidden lg:block">
+                <Sidebar />
+            </div>
+
+            <!-- Center: content with full-height dotted left border -->
+            <main
+                id="main"
+                class="min-h-screen px-5 lg:px-10 pt-0 lg:border-l lg:border-dotted lg:border-[rgb(var(--color-border-subtle))]"
+            >
+                <slot name="main" />
+            </main>
+
+            <!-- Right: empty spacer for symmetry -->
+            <div class="hidden lg:block"></div>
+        </div>
     </body>
 </html>
+
+<style>
+    .page-grid {
+        display: grid;
+        grid-template-columns: 1fr minmax(0, 42rem) 1fr;
+        min-height: 100vh;
+    }
+
+    @media (max-width: 1023px) {
+        .page-grid {
+            display: block;
+            max-width: 42rem;
+            margin: 0 auto;
+        }
+    }
+</style>

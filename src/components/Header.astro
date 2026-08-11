@@ -1,38 +1,21 @@
 ---
 import Nav from "./Nav.astro";
-// import HeaderLink from "./HeaderLink.astro";
 import DarkModeToggle from "./DarkModeToggle.astro";
 ---
 
-<header>
-    <a
-        class="unset absolute z-10 left-[50%] -top-[100rem] translate-x-[-50%] bg-white text-black px-8 py-2 focus:top-[initial]"
-        href="#main"
-    >
-        Skip to content
-    </a>
+<div class="max-w-4xl mx-auto px-6 sm:px-8 h-14 flex items-center justify-between">
     <a
         href="/"
-        class="unset font-semibold hover:opacity-70 transition-opacity duration-200 hover:transition hover:duration-200"
+        class="unset flex flex-col gap-0.5 hover:opacity-60 transition-opacity duration-150"
     >
-        Oğuzhan Durgut<span
-            class="opacity-80 text-sm font-normal ml-0.5 text-center"
-            >@odurgut</span
-        >
+        <span class="text-sm font-semibold text-text-heading">Oğuzhan Durgut</span>
+        <span class="text-xs text-text-muted">@odurgut</span>
     </a>
-    <div class="flex justify-end items-center">
-        <Nav />
-        <div
-            class="justify-self-end flex items-center content-center text-text-bold"
-        >
-            <DarkModeToggle />
-        </div>
+    <div class="flex items-center gap-4">
+        <nav>
+            <ul class="unset flex text-xs gap-3 [&>li]:p-0">
+            </ul>
+        </nav>
+        <DarkModeToggle />
     </div>
-</header>
-<style>
-    header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-</style>
+</div>

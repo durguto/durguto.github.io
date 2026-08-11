@@ -1,0 +1,111 @@
+---
+interface Props {
+    src: string;
+}
+const { src } = Astro.props;
+---
+
+<div class="banner-wrap mb-8 -mx-5 lg:-mx-10">
+    <canvas
+        id="banner-canvas"
+        data-src={src}
+        style="image-rendering: pixelated; width: 100%; display: block;"
+    ></canvas>
+    <img id="banner-src" src={src} alt="" class="hidden" crossorigin="anonymous" />
+</div>
+
+<script>
+    const BAYER: number[][] = [
+        [ 0, 32,  8, 40,  2, 34, 10, 42],
+        [48, 16, 56, 24, 50, 18, 58, 26],
+        [12, 44,  4, 36, 14, 46,  6, 38],
+        [60, 28, 52, 20, 62, 30, 54, 22],
+        [ 3, 35, 11, 43,  1, 33,  9, 41],
+        [51, 19, 59, 27, 49, 17, 57, 25],
+        [15, 47,  7, 39, 13, 45,  5, 37],
+        [63, 31, 55, 23, 61, 29, 53, 21],
+    ];
+    const BAYER_N = 8;
+    const BAYER_DIV = 64;
+
+    function renderBanner() {
+        const canvas = document.getElementById("banner-canvas") as HTMLCanvasElement;
+        const img = document.getElementById("banner-src") as HTMLImageElement;
+        if (!canvas || !img) return;
+
+        // 2.5:1 banner ratio, higher res for detail
+        const W = 480;
+        const H = 192;
+        canvas.width = W;
+        canvas.height = H;
+
+        const ctx = canvas.getContext("2d")!;
+
+        // cover crop: center
+        const scale = Math.max(W / img.naturalWidth, H / img.naturalHeight);
+        const sw = W / scale;
+        const sh = H / scale;
+        const sx = (img.naturalWidth - sw) / 2;
+        const sy = (img.naturalHeight - sh) / 2;
+        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, W, H);
+
+        const imageData = ctx.getImageData(0, 0, W, H);
+        const d = imageData.data;
+
+        // read bg from CSS var
+        const cssVar = getComputedStyle(document.documentElement)
+            .getPropertyValue("--color-bg-body").trim();
+        const [bgR, bgG, bgB] = cssVar.split(" ").map(Number);
+        const isDark = document.documentElement.classList.contains("dark");
+        const fg = isDark ? 255 : 0;
+
+        // grayscale + histogram stretch
+        const grays = new Float32Array(W * H);
+        let lo = 255, hi = 0;
+        for (let i = 0; i < W * H; i++) {
+            const p = i * 4;
+            const g = 0.299 * d[p] + 0.587 * d[p + 1] + 0.114 * d[p + 2];
+            grays[i] = g;
+            if (g < lo) lo = g;
+            if (g > hi) hi = g;
+        }
+        const range = hi - lo || 1;
+
+        for (let y = 0; y < H; y++) {
+            for (let x = 0; x < W; x++) {
+                const i = y * W + x;
+                const norm = (grays[i] - lo) / range;
+                const gamma = Math.pow(norm, 0.8) * 255;
+                const threshold = (BAYER[y % BAYER_N][x % BAYER_N] / BAYER_DIV) * 255;
+                const p = i * 4;
+                if (gamma > threshold) {
+                    d[p] = d[p + 1] = d[p + 2] = fg;
+                } else {
+                    d[p] = bgR; d[p + 1] = bgG; d[p + 2] = bgB;
+                }
+                d[p + 3] = 255;
+            }
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+    }
+
+    const img = document.getElementById("banner-src") as HTMLImageElement;
+    if (img?.complete) {
+        renderBanner();
+    } else {
+        img?.addEventListener("load", renderBanner);
+    }
+
+    // re-render on theme change
+    new MutationObserver(() => renderBanner()).observe(
+        document.documentElement,
+        { attributes: true, attributeFilter: ["class"] }
+    );
+</script>
+
+<style>
+    .banner-wrap {
+        overflow: hidden;
+    }
+</style>

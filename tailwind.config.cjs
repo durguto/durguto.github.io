@@ -5,8 +5,8 @@ module.exports = {
     theme: {
         extend: {
             fontFamily: {
-                body: ["Inter", "sans-serif"],
-                heading: ["Inter", "sans-serif"],
+                body: ["ui-monospace", "SFMono-Regular", "SF Mono", "Cascadia Code", "Cascadia Mono", "Segoe UI Mono", "monospace"],
+                heading: ["ui-monospace", "SFMono-Regular", "SF Mono", "Cascadia Code", "Cascadia Mono", "Segoe UI Mono", "monospace"],
             },
             colors: {
                 transparent: "transparent",
@@ -36,6 +36,8 @@ module.exports = {
             typography: (theme) => ({
                 DEFAULT: {
                     css: {
+                        lineHeight: "1.85",
+                        letterSpacing: "0.012em",
                         a: {
                             "text-decoration": "none",
                             "background-repeat": "no-repeat",
@@ -69,7 +71,7 @@ module.exports = {
                             "padding-right": "1.5rem",
                         },
                         "blockquote::before": {
-                            "font-family": "Inter",
+                            "font-family": "ui-monospace, monospace",
                             content: "'“'",
                             "font-size": "4em",
                             color: "rgb(var(--color-primary-main))",

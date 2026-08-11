@@ -14,11 +14,8 @@ import HeaderLink from "./HeaderLink.astro";
     </nav>
     <nav class="md:hidden">
         <button id="mobile-menu-open">
-            <i
-                class="fa-solid fa-bars"
-                aria-hidden="true"
-                title="Open mobile menu"></i>
-            <span class="fa-sr-only">Open mobile menu</span>
+            <span aria-hidden="true" title="Open mobile menu">≡</span>
+            <span class="sr-only">Open mobile menu</span>
         </button>
         <section
             id="mobile-menu"
@@ -29,11 +26,8 @@ import HeaderLink from "./HeaderLink.astro";
                     id="mobile-menu-close"
                     class="h-[5rem] text-lg xml-[1px] self-end mx-8"
                 >
-                    <i
-                        class="fa-solid fa-xmark"
-                        aria-hidden="true"
-                        title="Close mobile menu"></i>
-                    <span class="fa-sr-only">Close mobile menu</span>
+                    <span aria-hidden="true" title="Close mobile menu">×</span>
+                    <span class="sr-only">Close mobile menu</span>
                 </button>
                 <ul
                     class="unset flex flex-col text-text-bold gap-4 [&>li]:p-0 px-6"

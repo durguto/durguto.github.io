@@ -1,0 +1,28 @@
+---
+import DarkModeToggle from "./DarkModeToggle.astro";
+import DonutDither from "./DonutDither.astro";
+---
+
+<aside class="sticky top-10 flex flex-col items-end gap-6 pr-8">
+
+    <!-- Profile card -->
+    <div class="flex flex-col items-end gap-3">
+        <a href="/" class="unset flex flex-col items-end gap-3 group" data-donut-link>
+            <DonutDither />
+            <div class="flex flex-col items-end gap-0.5 group-hover:opacity-60 transition-opacity duration-150">
+                <span class="text-sm font-semibold text-text-heading tracking-tight">Oğuzhan Durgut</span>
+                <span class="text-xs text-text-muted">@odurgut</span>
+            </div>
+        </a>
+        <p class="text-xs text-text-muted text-right">// software engineer</p>
+        <a
+            href="https://github.com/odurgut"
+            target="_blank"
+            class="unset text-xs text-text-muted hover:text-text-heading transition-colors duration-150"
+        >
+            GitHub ↗
+        </a>
+    </div>
+
+    <DarkModeToggle />
+</aside>

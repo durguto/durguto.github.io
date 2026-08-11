@@ -1,13 +1,89 @@
 ---
+import { readAll } from "../lib/markdoc/read";
+import { blog } from "../lib/markdoc/frontmatter.schema";
 import PageMeta from "../components/PageMeta.astro";
 import PageLayout from "../layouts/PageLayout.astro";
 import Intro from "../components/Intro.astro";
 import { SITE_TITLE } from "../config";
+
+const posts = await readAll({
+  directory: "blog",
+  frontmatterSchema: blog,
+});
+
+const sortedPosts = posts
+  .filter((p) => p.frontmatter.draft !== true)
+  .sort(
+    (a, b) =>
+      new Date(b.frontmatter.date).valueOf() -
+      new Date(a.frontmatter.date).valueOf()
+  );
+
+const postsByYear = sortedPosts.reduce((acc, post) => {
+  const year = new Date(post.frontmatter.date).getFullYear();
+  if (!acc[year]) acc[year] = [];
+  acc[year].push(post);
+  return acc;
+}, {} as Record<number, typeof sortedPosts>);
+
+const years = Object.keys(postsByYear).map(Number).sort((a, b) => b - a);
 ---
 
 <PageLayout>
-    <PageMeta title={`${SITE_TITLE}`} slot="meta" />
-    <Fragment slot="main">
-        <Intro />
-    </Fragment>
+  <PageMeta title={`${SITE_TITLE}`} slot="meta" />
+  <Fragment slot="main">
+    <Intro />
+
+    <section class="pb-12">
+      {years.map((year) => {
+        const yearPosts = postsByYear[year];
+        return (
+          <div class="mb-8">
+            <p class="text-xs text-text-muted mb-2 select-none">// {year}</p>
+            {yearPosts.map((post, i) => {
+              const isLast = i === yearPosts.length - 1;
+              const prefix = isLast ? "└─" : "├─";
+              const d = post.frontmatter.date;
+              const formattedDate = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+              return (
+                <div class="flex items-baseline gap-1.5 py-[0.3rem]">
+                  <span class="text-text-muted text-xs shrink-0 select-none font-mono">{prefix}</span>
+                  {post.frontmatter.external ? (
+                    <a
+                      href={post.frontmatter.url}
+                      target="_blank"
+                      class="unset text-text-heading text-xs font-medium hover:opacity-60 transition-opacity duration-150 shrink-0"
+                    >
+                      {post.frontmatter.title} ↗
+                    </a>
+                  ) : (
+                    <a
+                      href={`/blog/${post.slug}`}
+                      class="unset text-text-heading text-xs font-medium hover:opacity-60 transition-opacity duration-150 shrink-0"
+                    >
+                      {post.frontmatter.title}
+                    </a>
+                  )}
+                  <span class="dot-leader flex-1 min-w-2"></span>
+                  <time
+                    datetime={post.frontmatter.date.toISOString()}
+                    class="text-xs text-text-muted tabular-nums shrink-0 select-none"
+                  >
+                    {formattedDate}
+                  </time>
+                </div>
+              );
+            })}
+          </div>
+        );
+      })}
+    </section>
+  </Fragment>
 </PageLayout>
+
+<style>
+  .dot-leader {
+    border-bottom: 1px dotted rgb(var(--color-border-subtle));
+    margin-bottom: 4px;
+  }
+</style>

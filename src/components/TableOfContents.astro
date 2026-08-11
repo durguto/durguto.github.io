@@ -1,0 +1,67 @@
+---
+---
+
+<aside id="toc-sidebar" class="sticky top-10 flex flex-col items-start gap-6 pl-8">
+    <p class="text-xs text-text-muted">// contents</p>
+    <nav id="toc-nav" class="flex flex-col items-start gap-2">
+    </nav>
+</aside>
+
+<script>
+    function buildToc() {
+        const article = document.querySelector(".blog-post");
+        const nav = document.getElementById("toc-nav");
+        const sidebar = document.getElementById("toc-sidebar");
+        if (!article || !nav || !sidebar) return;
+
+        const headings = [...article.querySelectorAll("h2, h3")] as HTMLElement[];
+        if (headings.length === 0) {
+            sidebar.style.display = "none";
+            return;
+        }
+
+        headings.forEach((h) => {
+            if (!h.id) {
+                h.id = h.textContent
+                    ?.toLowerCase()
+                    .replace(/\s+/g, "-")
+                    .replace(/[^a-z0-9-]/g, "") ?? "";
+            }
+        });
+
+        headings.forEach((h) => {
+            const a = document.createElement("a");
+            a.href = `#${h.id}`;
+            const textSpan = h.querySelector("span:last-child");
+            a.textContent = (textSpan?.textContent ?? h.textContent ?? "").trim();
+            a.dataset.id = h.id;
+            a.className = [
+                "toc-link",
+                "animated-link",
+                "block",
+                "leading-snug",
+                h.tagName === "H3" ? "pl-3" : "",
+            ].join(" ");
+            nav.appendChild(a);
+        });
+
+        const links = [...nav.querySelectorAll(".toc-link")] as HTMLAnchorElement[];
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        links.forEach((l) => l.classList.remove("show"));
+                        nav.querySelector(`[data-id="${entry.target.id}"]`)
+                            ?.classList.add("show");
+                    }
+                });
+            },
+            { rootMargin: "-15% 0% -75% 0%" }
+        );
+
+        headings.forEach((h) => observer.observe(h));
+    }
+
+    buildToc();
+</script>
