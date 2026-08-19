@@ -39,7 +39,7 @@ const years = Object.keys(postsByYear).map(Number).sort((a, b) => b - a);
         const yearPosts = postsByYear[year];
         return (
           <div class="mb-8">
-            <p class="text-xs text-text-muted mb-2 select-none">// {year}</p>
+            <p class="text-base text-text-muted mb-2 select-none">// {year}</p>
             {yearPosts.map((post, i) => {
               const isLast = i === yearPosts.length - 1;
               const prefix = isLast ? "└─" : "├─";
@@ -47,19 +47,19 @@ const years = Object.keys(postsByYear).map(Number).sort((a, b) => b - a);
               const formattedDate = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
               return (
                 <div class="flex items-baseline gap-1.5 py-[0.3rem]">
-                  <span class="text-text-muted text-xs shrink-0 select-none font-mono">{prefix}</span>
+                  <span class="text-text-muted text-base shrink-0 select-none">{prefix}</span>
                   {post.frontmatter.external ? (
                     <a
                       href={post.frontmatter.url}
                       target="_blank"
-                      class="unset text-text-heading text-xs font-medium hover:opacity-60 transition-opacity duration-150 shrink-0"
+                      class="unset text-text-heading text-base font-medium hover:opacity-60 transition-opacity duration-150 shrink-0"
                     >
                       {post.frontmatter.title} ↗
                     </a>
                   ) : (
                     <a
                       href={`/blog/${post.slug}`}
-                      class="unset text-text-heading text-xs font-medium hover:opacity-60 transition-opacity duration-150 shrink-0"
+                      class="unset text-text-heading text-base font-medium hover:opacity-60 transition-opacity duration-150 shrink-0"
                     >
                       {post.frontmatter.title}
                     </a>
@@ -67,7 +67,7 @@ const years = Object.keys(postsByYear).map(Number).sort((a, b) => b - a);
                   <span class="dot-leader flex-1 min-w-2"></span>
                   <time
                     datetime={post.frontmatter.date.toISOString()}
-                    class="text-xs text-text-muted tabular-nums shrink-0 select-none"
+                    class="text-base text-text-muted tabular-nums shrink-0 select-none"
                   >
                     {formattedDate}
                   </time>

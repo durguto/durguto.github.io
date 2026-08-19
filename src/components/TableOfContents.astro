@@ -1,9 +1,9 @@
 ---
 ---
 
-<aside id="toc-sidebar" class="sticky top-10 flex flex-col items-start gap-6 pl-8">
-    <p class="text-xs text-text-muted">// contents</p>
-    <nav id="toc-nav" class="flex flex-col items-start gap-2">
+<aside id="toc-sidebar" class="sticky top-10 flex flex-col gap-4 pl-8">
+    <p class="text-base text-text-muted">// contents</p>
+    <nav id="toc-nav" class="toc-nav w-full">
     </nav>
 </aside>
 
@@ -32,36 +32,103 @@
         headings.forEach((h) => {
             const a = document.createElement("a");
             a.href = `#${h.id}`;
-            const textSpan = h.querySelector("span:last-child");
-            a.textContent = (textSpan?.textContent ?? h.textContent ?? "").trim();
+            const linkEl = h.querySelector("a");
+            a.textContent = (linkEl?.textContent ?? h.textContent ?? "").trim();
             a.dataset.id = h.id;
             a.className = [
                 "toc-link",
-                "animated-link",
                 "block",
-                "leading-snug",
-                h.tagName === "H3" ? "pl-3" : "",
-            ].join(" ");
+                h.tagName === "H3" ? "toc-sub" : "",
+            ].filter(Boolean).join(" ");
             nav.appendChild(a);
         });
 
         const links = [...nav.querySelectorAll(".toc-link")] as HTMLAnchorElement[];
 
-        const observer = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        links.forEach((l) => l.classList.remove("show"));
-                        nav.querySelector(`[data-id="${entry.target.id}"]`)
-                            ?.classList.add("show");
-                    }
-                });
-            },
-            { rootMargin: "-15% 0% -75% 0%" }
-        );
+        function updateActive() {
+            const scrollY = window.scrollY;
+            const offset = 80; // px from top to consider "passed"
+            let active = headings[0];
 
-        headings.forEach((h) => observer.observe(h));
+            for (const h of headings) {
+                if (h.getBoundingClientRect().top + scrollY <= scrollY + offset) {
+                    active = h;
+                } else {
+                    break;
+                }
+            }
+
+            links.forEach((l) => l.classList.remove("show"));
+            nav.querySelector(`[data-id="${active?.id}"]`)?.classList.add("show");
+        }
+
+        window.addEventListener("scroll", updateActive, { passive: true });
+        updateActive();
     }
 
-    buildToc();
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", buildToc);
+    } else {
+        buildToc();
+    }
 </script>
+
+<style is:global>
+    .toc-nav {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .toc-link {
+        position: relative;
+        display: block;
+        padding: 0.2em 0.5em 0.2em 1.5em;
+        font-size: 1rem;
+        color: rgb(var(--color-text-muted));
+        text-decoration: none !important;
+        transition: color 0.15s ease;
+        line-height: 1.6;
+    }
+
+    /* h3 indent */
+    .toc-link.toc-sub {
+        padding-left: 2.5em;
+    }
+
+    /* | character on the left */
+    .toc-link::before {
+        content: '|';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgb(var(--color-border-subtle));
+        font-size: 1em;
+        line-height: 1;
+        transition: color 0.15s ease;
+    }
+
+    .toc-link.toc-sub::before {
+        left: 1em;
+    }
+
+    /* hover: | → > */
+    .toc-link:hover {
+        color: rgb(var(--color-text-heading));
+    }
+
+    .toc-link:hover::before {
+        content: '>';
+        color: rgb(var(--color-text-muted));
+    }
+
+    /* active: | → > */
+    .toc-link.show {
+        color: rgb(var(--color-text-heading));
+    }
+
+    .toc-link.show::before {
+        content: '>';
+        color: rgb(var(--color-text-heading));
+    }
+</style>

@@ -5,8 +5,8 @@ module.exports = {
     theme: {
         extend: {
             fontFamily: {
-                body: ["ui-monospace", "SFMono-Regular", "SF Mono", "Cascadia Code", "Cascadia Mono", "Segoe UI Mono", "monospace"],
-                heading: ["ui-monospace", "SFMono-Regular", "SF Mono", "Cascadia Code", "Cascadia Mono", "Segoe UI Mono", "monospace"],
+                body: ['"Ioskeley Mono"', "ui-monospace", "SFMono-Regular", "SF Mono", "monospace"],
+                heading: ['"Ioskeley Mono"', "ui-monospace", "SFMono-Regular", "SF Mono", "monospace"],
             },
             colors: {
                 transparent: "transparent",
@@ -21,8 +21,7 @@ module.exports = {
                     muted: "rgb(var(--color-text-muted) / <alpha-value>)",
                     code: "rgb(var(--color-text-code) / <alpha-value>)",
                     link: "rgb(var(--color-text-link) / <alpha-value>)",
-                    selection:
-                        "rgb(var(--color-text-selection) / <alpha-value>)",
+                    selection: "rgb(var(--color-text-selection) / <alpha-value>)",
                 },
                 bg: {
                     body: "rgb(var(--color-bg-body) / <alpha-value>)",
@@ -37,57 +36,116 @@ module.exports = {
                 DEFAULT: {
                     css: {
                         lineHeight: "1.85",
-                        letterSpacing: "0.012em",
+                        letterSpacing: "0.01em",
+                        h1: { fontSize: "1em", fontWeight: "600" },
+                        h2: { fontSize: "1em", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.06em" },
+                        h3: { fontSize: "1em", fontWeight: "500" },
+                        h4: { fontSize: "1em", fontWeight: "500" },
+                        h5: { fontSize: "1em", fontWeight: "400" },
+                        h6: { fontSize: "1em", fontWeight: "400" },
                         a: {
-                            "text-decoration": "none",
-                            "background-repeat": "no-repeat",
-                            "background-size": "100% 1.5px",
-                            "background-position": "0 100%",
-                            "background-image":
-                                "linear-gradient(to right, rgb(var(--color-text-link)/1), rgb(var(--color-text-link)/1))",
+                            "text-decoration": "underline",
+                            "text-underline-offset": "2px",
+                            "text-decoration-color": "rgb(var(--color-border-code))",
+                            "text-decoration-thickness": "1px",
                             "&:hover": {
-                                color: "rgb(var(--color-text-link))",
+                                opacity: "0.6",
                             },
                         },
                         "h1, h2, h3, h4, h5": {
                             color: "rgb(var(--color-text-heading))",
                         },
-                        "code::before": {
+                        "code::before": { content: "none" },
+                        "code::after": { content: "none" },
+                        "ul": {
+                            "list-style-type": '"* "',
+                            "padding-left": "1.5em",
+                        },
+                        "ul > li": {
+                            "padding-left": "0.25em",
+                        },
+                        "ul > li::before": {
                             content: "none",
                         },
-                        "code::after": {
-                            content: "none",
+                        "ul > li::marker": {
+                            color: "rgb(var(--color-text-muted))",
+                        },
+                        "ol": {
+                            "padding-left": "1.5em",
+                        },
+                        "ol > li": {
+                            "padding-left": "0.25em",
+                        },
+                        "ol > li::marker": {
+                            color: "rgb(var(--color-text-muted))",
                         },
                         blockquote: {
-                            border: "none",
+                            background: "rgb(var(--color-bg-code))",
+                            padding: "1em 1.25em 1em 2em",
+                            margin: "1.75em 0",
+                            "border-left": "none",
+                            "border-top": "none",
+                            "border-right": "none",
+                            "border-bottom": "none",
+                            "font-style": "normal",
+                            color: "rgb(var(--color-text-body))",
                             position: "relative",
-                            width: "96%",
-                            margin: "0 auto",
-                            // "font-size": "1.0625em",
-                            "font-size": "1em",
-                            "padding-top": "1.5rem",
-                            "padding-bottom": "0.5rem",
-                            "padding-left": "1.5rem",
-                            "padding-right": "1.5rem",
+                            width: "100%",
                         },
                         "blockquote::before": {
-                            "font-family": "ui-monospace, monospace",
-                            content: "'“'",
-                            "font-size": "4em",
-                            color: "rgb(var(--color-primary-main))",
-                            opacity: 0.5,
+                            content: "'▸'",
                             position: "absolute",
-                            left: "-10px",
-                            top: "-10px",
+                            top: "1em",
+                            left: "0.625em",
+                            color: "rgb(var(--color-text-muted))",
+                            "font-size": "0.85em",
+                            "line-height": "1",
                         },
-                        "blockquote::after": {
-                            content: "",
+                        "blockquote::after": { content: "none" },
+                        "blockquote p:first-of-type::before": { content: "none" },
+                        "blockquote p:last-of-type::after": { content: "none" },
+                        hr: {
+                            "border-style": "dashed",
+                            "border-color": "rgb(var(--color-border-subtle))",
+                            "border-top-width": "1px",
+                            "margin-top": "2.5em",
+                            "margin-bottom": "2.5em",
                         },
-                        "blockquote p:first-of-type::before": {
-                            content: "",
+                        table: {
+                            "font-size": "1em",
+                            "border-collapse": "collapse",
+                            width: "100%",
+                            margin: "1.75em 0",
                         },
-                        "blockquote p:last-of-type::after": {
-                            content: "",
+                        "thead": {
+                            "border-bottom": "1px dashed rgb(var(--color-border-subtle))",
+                        },
+                        "thead th": {
+                            border: "1px dashed rgb(var(--color-border-subtle))",
+                            padding: "0.5em 1em",
+                            "font-weight": "500",
+                            "text-align": "left",
+                            "line-height": "1.4",
+                        },
+                        "thead th:first-child": { "padding-left": "1em" },
+                        "tbody tr": {
+                            "border-top": "1px dashed rgb(var(--color-border-subtle))",
+                            "border-bottom": "1px dashed rgb(var(--color-border-subtle))",
+                        },
+                        "tbody td": {
+                            border: "1px dashed rgb(var(--color-border-subtle))",
+                            padding: "0.45em 1em",
+                            "vertical-align": "top",
+                            "line-height": "1.6",
+                        },
+                        "tbody td:first-child": { "padding-left": "1em" },
+                        "tbody tr:last-child td": {},
+                        pre: {
+                            "border-radius": "0",
+                            border: "1px solid rgb(var(--color-border-code))",
+                            "font-size": "1em",
+                            "line-height": "1.65",
+                            padding: "1em",
                         },
                     },
                 },
@@ -100,19 +158,16 @@ module.exports = {
                         "--tw-prose-bold": "rgb(var(--color-text-bold))",
                         "--tw-prose-counters": "rgb(var(--color-text-body))",
                         "--tw-prose-bullets": "rgb(var(--color-text-body))",
-                        "--tw-prose-hr": "rgb(var(--color-text-muted))",
-                        "--tw-prose-quotes": "rgb(var(--color-text-body))",
-                        "--tw-prose-quote-borders":
-                            "rgb(var(--color-primary-main))",
-                        "--tw-prose-captions":
-                            "rgb(var(--color-primary-heading))",
-                        "--tw-prose-quote-captions":
-                            "rgb(var(--color-primary-heading))",
+                        "--tw-prose-hr": "rgb(var(--color-border-subtle))",
+                        "--tw-prose-quotes": "rgb(var(--color-text-muted))",
+                        "--tw-prose-quote-borders": "rgb(var(--color-border-subtle))",
+                        "--tw-prose-captions": "rgb(var(--color-text-muted))",
+                        "--tw-prose-quote-captions": "rgb(var(--color-text-muted))",
                         "--tw-prose-code": "rgb(var(--color-text-code))",
                         "--tw-prose-pre-code": "rgb(var(--color-text-code))",
                         "--tw-prose-pre-bg": "rgb(var(--color-bg-code))",
-                        "--tw-prose-th-borders": "rgb(var(--color-text-muted))",
-                        "--tw-prose-td-borders": "rgb(var(--color-text-muted))",
+                        "--tw-prose-th-borders": "rgb(var(--color-border-subtle))",
+                        "--tw-prose-td-borders": "rgb(var(--color-border-subtle))",
                     },
                 },
             }),

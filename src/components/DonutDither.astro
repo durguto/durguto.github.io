@@ -35,8 +35,6 @@
         // radians per second (frame-rate independent)
         const SPEED_A = 1.2;
         const SPEED_B = 0.48;
-        const HOVER_A = 7.0;
-        const HOVER_B = 3.0;
 
         const trigger = canvas.closest("[data-donut-link]") ?? canvas;
         trigger.addEventListener("mouseenter", () => hovered = true);
@@ -107,8 +105,8 @@
                 if (link) link.href = faviconCanvas.toDataURL("image/png");
             }
 
-            A += (hovered ? HOVER_A : SPEED_A) * delta;
-            B += (hovered ? HOVER_B : SPEED_B) * delta;
+            A += (hovered ? -SPEED_A : SPEED_A) * delta;
+            B += (hovered ? -SPEED_B : SPEED_B) * delta;
             requestAnimationFrame(frame);
         }
 

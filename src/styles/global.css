@@ -1,3 +1,74 @@
+@font-face {
+    font-family: 'Ioskeley Mono';
+    src: url('/fonts/IoskeleyMono-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Ioskeley Mono';
+    src: url('/fonts/IoskeleyMono-Italic.woff2') format('woff2');
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Ioskeley Mono';
+    src: url('/fonts/IoskeleyMono-Light.woff2') format('woff2');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Ioskeley Mono';
+    src: url('/fonts/IoskeleyMono-LightItalic.woff2') format('woff2');
+    font-weight: 300;
+    font-style: italic;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Ioskeley Mono';
+    src: url('/fonts/IoskeleyMono-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Ioskeley Mono';
+    src: url('/fonts/IoskeleyMono-MediumItalic.woff2') format('woff2');
+    font-weight: 500;
+    font-style: italic;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Ioskeley Mono';
+    src: url('/fonts/IoskeleyMono-SemiBold.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Ioskeley Mono';
+    src: url('/fonts/IoskeleyMono-SemiBoldItalic.woff2') format('woff2');
+    font-weight: 600;
+    font-style: italic;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Ioskeley Mono';
+    src: url('/fonts/IoskeleyMono-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Ioskeley Mono';
+    src: url('/fonts/IoskeleyMono-BoldItalic.woff2') format('woff2');
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -22,12 +93,12 @@
         --color-text-code: 10 10 10;
         --color-text-selection: 255 255 255;
 
-        --color-bg-body: 255 255 255;
-        --color-bg-code: 245 245 245;
+        --color-bg-body: 247 247 248;
+        --color-bg-code: 237 237 239;
         --color-bg-selection: 10 10 10;
 
-        --color-border-code: 228 228 228;
-        --color-border-subtle: 235 235 235;
+        --color-border-code: 210 210 213;
+        --color-border-subtle: 210 210 213;
         --color-bg-card: 250 250 250;
     }
 
@@ -54,6 +125,7 @@
     }
 
     :root {
+        font-size: 12px;
         font-family: theme("fontFamily.body");
         background-color: theme("colors.bg.body");
         color: theme("colors.text.body");
@@ -62,6 +134,7 @@
         transition: background-color 0.2s ease;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        font-feature-settings: "calt" 1, "zero" 1;
     }
 
     h1,
@@ -91,15 +164,10 @@
         just add a class `unset` to it. 
     */
     a:not(.unset) {
-        text-decoration: none;
-        background-repeat: no-repeat;
-        background-size: 100% 1px;
-        background-position: 0 100%;
-        background-image: linear-gradient(
-            to right,
-            rgb(var(--color-border-code)),
-            rgb(var(--color-border-code))
-        );
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        text-decoration-color: rgb(var(--color-border-code));
+        text-decoration-thickness: 1px;
         transition: opacity 0.15s ease;
     }
 
@@ -110,16 +178,34 @@
     code:not(pre code):not(.unset) {
         background-color: theme("colors.bg.code");
         color: theme("colors.text.code");
-        padding: 0.1rem 0.3rem;
-        border-radius: 0.25rem;
-        font-size: 0.8125em;
-        font-weight: 500;
+        padding: 0.1em 0.3em;
+        border-radius: 0;
+        font-size: 1em;
+        font-weight: 400;
         border: 1px solid theme("colors.border.code");
-        font-family: ui-monospace, "SF Mono", monospace;
+        font-family: inherit;
     }
 
     html.dark code:not(pre code) {
         background-color: rgb(var(--color-bg-code));
+        border-color: rgb(var(--color-border-code));
+    }
+
+    kbd {
+        display: inline-block;
+        padding: 0.1em 0.35em;
+        border: 1px solid rgb(var(--color-border-code));
+        background: rgb(var(--color-bg-code));
+        color: rgb(var(--color-text-body));
+        font-family: inherit;
+        font-size: 1em;
+        line-height: 1.4;
+        border-radius: 0;
+    }
+
+    html.dark kbd {
+        background: rgb(var(--color-bg-code));
+        color: rgb(var(--color-text-body));
         border-color: rgb(var(--color-border-code));
     }
 
@@ -163,23 +249,27 @@
 
     /* ------ REUSABLE UTILS - START ------ */
     .post-content {
-        font-size: 0.9375rem;
+        font-size: 1rem; /* 12px (root = 12px) */
+        line-height: 1.85;
     }
 
-    .post-content h2 {
-        font-size: 1.0625rem;
-        font-weight: 600;
+    .post-content p {
+        margin-top: 1.25em;
+        margin-bottom: 1.25em;
     }
 
-    .post-content h3 {
-        font-size: 0.9375rem;
-        font-weight: 600;
+    .post-content h2,
+    .post-content h3,
+    .post-content h4,
+    .post-content h5,
+    .post-content h6 {
+        font-size: 1rem;
     }
 
     .animated-link {
         position: relative;
         text-decoration: none;
-        font-size: 0.75rem;
+        font-size: 1rem;
         color: rgb(var(--color-text-muted));
         transition: color 0.15s ease;
     }

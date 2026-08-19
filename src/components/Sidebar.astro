@@ -15,7 +15,7 @@ const hero = mobileStyle === "hero";
   flex
   ${hero
     ? "flex-col items-center gap-4 px-5 pt-12 pb-8"
-    : "flex-row items-center justify-between gap-3 px-5 py-3 border-b border-[rgb(var(--color-border-subtle))]"
+    : "flex-row items-center justify-between gap-3 px-5 py-3"
   }
 `}>
 
@@ -24,20 +24,57 @@ const hero = mobileStyle === "hero";
             <DonutDither />
         </div>
         <div class={`flex flex-col gap-0.5 group-hover:opacity-60 transition-opacity duration-150 lg:items-end ${hero ? "items-center text-center" : ""}`}>
-            <span class="text-sm font-semibold text-text-heading tracking-tight">Oğuzhan Durgut</span>
-            <span class="text-xs text-text-muted">@odurgut</span>
-            {hero && <span class="text-xs text-text-muted mt-1">// software engineer</span>}
+            <span class="text-base font-semibold text-text-heading tracking-tight">Oğuzhan Durgut</span>
+            <span class="text-base text-text-muted">@odurgut</span>
+            {hero && <span class="text-base text-text-muted mt-1">software engineer</span>}
         </div>
     </a>
 
-    <div class="flex flex-row items-baseline gap-4 lg:flex-col lg:items-end lg:gap-3">
-        <p class="hidden lg:block text-xs text-text-muted text-right">// software engineer</p>
+    <div class="flex flex-row items-center gap-4 lg:flex-col lg:items-end lg:gap-2">
+        <p class="hidden lg:block text-base text-text-muted text-right mb-1.5">software engineer</p>
         <a
             href="https://github.com/odurgut"
             target="_blank"
-            class="unset text-[11px] font-mono text-text-muted hover:text-text-heading transition-colors duration-150"
-        >github ↗</a>
+            class="unset nav-btn"
+        >[ github ]</a>
         <DarkModeToggle />
     </div>
 
 </aside>
+
+<style is:global>
+    mode-toggle {
+        display: block;
+        line-height: normal;
+    }
+
+    .nav-btn {
+        font-size: 1rem;
+        color: rgb(var(--color-text-muted));
+        text-decoration: none !important;
+        transition: color 0.15s ease;
+        display: inline-block;
+        white-space: nowrap;
+    }
+
+    .nav-btn:hover {
+        color: rgb(var(--color-text-heading));
+    }
+
+    /* DarkModeToggle button aynı stili alsın */
+    #mode-toggle {
+        font-size: 1rem;
+        color: rgb(var(--color-text-muted));
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        transition: color 0.15s ease;
+        display: inline-block;
+        white-space: nowrap;
+    }
+
+    #mode-toggle:hover {
+        color: rgb(var(--color-text-heading));
+    }
+</style>

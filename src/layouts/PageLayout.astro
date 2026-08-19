@@ -34,7 +34,7 @@ const { heroMobile = false } = Astro.props;
 
             <main
                 id="main"
-                class="lg:min-h-screen px-5 lg:px-10 pt-0 lg:border-l lg:border-dotted lg:border-[rgb(var(--color-border-subtle))]"
+                class="lg:min-h-screen px-5 lg:px-8 pt-0 lg:border-l lg:border-dotted lg:border-[rgb(var(--color-border-subtle))]"
             >
                 <slot name="main" />
             </main>
@@ -47,14 +47,16 @@ const { heroMobile = false } = Astro.props;
 <style>
     .page-grid {
         display: grid;
-        grid-template-columns: 1fr minmax(0, 42rem) 1fr;
+        grid-template-columns: 1fr 640px 1fr;
+        max-width: 1200px;
+        margin: 0 auto;
         min-height: 100vh;
     }
 
     @media (max-width: 1023px) {
         .page-grid {
             display: block;
-            max-width: 42rem;
+            max-width: 640px;
             margin: 0 auto;
             min-height: 0;
         }

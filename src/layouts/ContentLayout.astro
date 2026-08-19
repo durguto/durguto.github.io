@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import { MY_NAME } from "../config";
 import ThemeScript from "./ThemeScript.astro";
 import Favicon from "./Favicon.astro";
 import Sidebar from "../components/Sidebar.astro";
@@ -41,19 +42,26 @@ const formattedDate = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padSt
 
             <main
                 id="main"
-                class="lg:min-h-screen px-5 lg:px-10 pt-0 lg:border-l lg:border-dotted lg:border-[rgb(var(--color-border-subtle))]"
+                class="lg:min-h-screen px-5 lg:px-8 pt-0 lg:border-l lg:border-dotted lg:border-[rgb(var(--color-border-subtle))]"
             >
-                <section class={`blog-post ${banner ? "pt-0" : "pt-16"}`}>
+                <section class="blog-post">
                     {banner && <BannerDither src={banner} />}
 
                     <!-- Post header -->
-                    <header class="mb-10 pb-6 -mx-5 lg:-mx-10 px-5 lg:px-10 border-b border-dotted border-[rgb(var(--color-border-subtle))]">
-                        <div class="flex items-baseline justify-between gap-4">
-                            <h1 class="not-prose m-0 text-xl font-semibold text-text-heading leading-snug tracking-tight">
-                                {title}
-                            </h1>
-                            <time class="text-xs text-text-muted tabular-nums shrink-0">{formattedDate}</time>
+                    <header class="post-header mb-10">
+                        <div class="meta-row">
+                            <span class="meta-label">DATE:</span>
+                            <time class="meta-value">{formattedDate}</time>
                         </div>
+                        <div class="meta-row">
+                            <span class="meta-label">TITLE:</span>
+                            <h1 class="not-prose m-0 meta-value font-normal">{title}</h1>
+                        </div>
+                        <div class="meta-row">
+                            <span class="meta-label">AUTHOR:</span>
+                            <span class="meta-value">{MY_NAME}</span>
+                        </div>
+                        <div class="meta-sep">------</div>
                     </header>
 
                     <!-- Post content -->
@@ -71,16 +79,51 @@ const formattedDate = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padSt
 </html>
 
 <style>
+    .post-header {
+        padding-top: 0;
+    }
+
+    .meta-row {
+        display: flex;
+        align-items: baseline;
+        gap: 0;
+        line-height: 2;
+    }
+
+    .meta-label {
+        font-size: 1rem;
+        color: rgb(var(--color-text-muted));
+        min-width: 6em;
+        flex-shrink: 0;
+        letter-spacing: 0.04em;
+    }
+
+    .meta-value {
+        font-size: 1rem;
+        color: rgb(var(--color-text-heading));
+        line-height: 2;
+    }
+
+    .meta-sep {
+        font-size: 1rem;
+        color: rgb(var(--color-border-subtle));
+        margin-top: 1.25em;
+        margin-bottom: 2em;
+        letter-spacing: 0.2em;
+    }
+
     .page-grid {
         display: grid;
-        grid-template-columns: 1fr minmax(0, 42rem) 1fr;
+        grid-template-columns: 1fr 640px 1fr;
+        max-width: 1200px;
+        margin: 0 auto;
         min-height: 100vh;
     }
 
     @media (max-width: 1023px) {
         .page-grid {
             display: block;
-            max-width: 42rem;
+            max-width: 640px;
             margin: 0 auto;
             min-height: 0;
         }
