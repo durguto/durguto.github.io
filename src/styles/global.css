@@ -85,7 +85,7 @@
         --color-primary-main: 10 10 10;
 
         --color-my-color: 10 10 10;
-        --color-text-body: 28 28 28;
+        --color-text-body: 40 38 35;
         --color-text-heading: 0 0 0;
         --color-text-bold: 10 10 10;
         --color-text-muted: 115 115 115;
@@ -107,7 +107,7 @@
         --color-primary-main: 255 255 255;
 
         --color-my-color: 200 200 200;
-        --color-text-body: 200 200 200;
+        --color-text-body: 185 183 179;
         --color-text-heading: 255 255 255;
         --color-text-bold: 240 240 240;
         --color-text-muted: 120 120 120;
@@ -258,12 +258,17 @@
         margin-bottom: 1.25em;
     }
 
-    .post-content h2,
+    .post-content h1,
+    .post-content h2 {
+        font-weight: 600;
+    }
+
     .post-content h3,
     .post-content h4,
     .post-content h5,
     .post-content h6 {
         font-size: 1rem;
+        font-weight: 500;
     }
 
     .animated-link {

@@ -20,7 +20,7 @@ const hero = mobileStyle === "hero";
 `}>
 
     <a href="/" class={`unset flex items-center gap-4 lg:flex-col lg:items-end group ${hero ? "flex-col" : "flex-row"}`} data-donut-link>
-        <div class={`shrink-0 lg:w-[120px] lg:h-[120px] ${hero ? "w-[96px] h-[96px]" : "w-10 h-10"}`}>
+        <div class={`sidebar-donut shrink-0 lg:w-[120px] lg:h-[120px] ${hero ? "w-[96px] h-[96px]" : "w-10 h-10"}`}>
             <DonutDither />
         </div>
         <div class={`flex flex-col gap-0.5 group-hover:opacity-60 transition-opacity duration-150 lg:items-end ${hero ? "items-center text-center" : ""}`}>
@@ -42,12 +42,33 @@ const hero = mobileStyle === "hero";
 
 </aside>
 
+<script>
+    const donuts = document.querySelectorAll<HTMLElement>(".sidebar-donut");
+    window.addEventListener("scroll", () => {
+        const scrolled = window.scrollY > 60;
+        donuts.forEach(d => d.classList.toggle("donut-scrolled", scrolled));
+    }, { passive: true });
+</script>
+
 <style is:global>
     mode-toggle {
         display: block;
         line-height: normal;
     }
 
+    .sidebar-donut {
+        transition: opacity 0.4s ease, filter 0.4s ease;
+    }
+
+    .sidebar-donut.donut-scrolled {
+        opacity: 0.18;
+        filter: grayscale(1);
+    }
+
+    .sidebar-donut.donut-scrolled:hover {
+        opacity: 1;
+        filter: grayscale(0);
+    }
     .nav-btn {
         font-size: 1rem;
         color: rgb(var(--color-text-muted));

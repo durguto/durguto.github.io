@@ -37,6 +37,7 @@
             a.dataset.id = h.id;
             a.className = [
                 "toc-link",
+                "unset",
                 "block",
                 h.tagName === "H3" ? "toc-sub" : "",
             ].filter(Boolean).join(" ");
@@ -115,6 +116,8 @@
     /* hover: | → > */
     .toc-link:hover {
         color: rgb(var(--color-text-heading));
+        opacity: 1;
+        text-decoration: none !important;
     }
 
     .toc-link:hover::before {

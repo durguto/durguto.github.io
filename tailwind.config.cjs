@@ -37,7 +37,7 @@ module.exports = {
                     css: {
                         lineHeight: "1.85",
                         letterSpacing: "0.01em",
-                        h1: { fontSize: "1em", fontWeight: "600" },
+                        h1: { fontSize: "1em", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.06em" },
                         h2: { fontSize: "1em", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.06em" },
                         h3: { fontSize: "1em", fontWeight: "500" },
                         h4: { fontSize: "1em", fontWeight: "500" },
@@ -54,6 +54,11 @@ module.exports = {
                         },
                         "h1, h2, h3, h4, h5": {
                             color: "rgb(var(--color-text-heading))",
+                        },
+                        "h1 a, h2 a, h3 a, h4 a, h5 a": {
+                            color: "rgb(var(--color-text-heading))",
+                            "text-decoration": "none",
+                            "font-weight": "inherit",
                         },
                         "code::before": { content: "none" },
                         "code::after": { content: "none" },
