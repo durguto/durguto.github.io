@@ -21,30 +21,44 @@ const { heroMobile = false } = Astro.props;
     </head>
 
     <body>
-        <!-- Mobile: sidebar as top bar (full width, horizontal) -->
-        <div class="lg:hidden">
-            <Sidebar mobileStyle={heroMobile ? "hero" : "nav"} />
-        </div>
-
-        <!-- Desktop: 3-column grid (sidebar | content | spacer) -->
-        <div class="page-grid">
-            <div class="hidden lg:block">
-                <Sidebar />
+        {heroMobile ? (
+            <div class="home-page">
+                <Sidebar mobileStyle="hero" />
+                <main id="main" class="px-6">
+                    <slot name="main" />
+                </main>
             </div>
+        ) : (
+            <>
+                <div class="lg:hidden">
+                    <Sidebar mobileStyle="nav" />
+                </div>
 
-            <main
-                id="main"
-                class="lg:min-h-screen px-6 lg:px-8 pt-0 lg:border-l lg:border-dotted lg:border-[rgb(var(--color-border-subtle))]"
-            >
-                <slot name="main" />
-            </main>
+                <div class="page-grid">
+                    <div class="hidden lg:block">
+                        <Sidebar />
+                    </div>
 
-            <div class="hidden lg:block"></div>
-        </div>
+                    <main
+                        id="main"
+                        class="lg:min-h-screen px-6 lg:px-8 pt-0 lg:border-l lg:border-dotted lg:border-[rgb(var(--color-border-subtle))]"
+                    >
+                        <slot name="main" />
+                    </main>
+
+                    <div class="hidden lg:block"></div>
+                </div>
+            </>
+        )}
     </body>
 </html>
 
 <style>
+    .home-page {
+        max-width: 640px;
+        margin: 0 auto;
+    }
+
     .page-grid {
         display: grid;
         grid-template-columns: 1fr 640px 1fr;
