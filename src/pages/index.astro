@@ -54,7 +54,7 @@ const years = Object.keys(postsByYear).map(Number).sort((a, b) => b - a);
                       target="_blank"
                       class="unset text-text-heading text-base font-medium hover:opacity-60 transition-opacity duration-150 shrink-0"
                     >
-                      {post.frontmatter.title} ↗
+                      {post.frontmatter.title}<span class="ext-icon">↗</span>
                     </a>
                   ) : (
                     <a
@@ -85,5 +85,12 @@ const years = Object.keys(postsByYear).map(Number).sort((a, b) => b - a);
   .dot-leader {
     border-bottom: 1px dotted rgb(var(--color-border-subtle));
     margin-bottom: 4px;
+  }
+
+  .ext-icon {
+    font-size: 0.7em;
+    color: rgb(var(--color-text-muted));
+    margin-left: 0.3em;
+    vertical-align: 0.15em;
   }
 </style>
