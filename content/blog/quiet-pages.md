@@ -45,4 +45,4 @@ I don't think a site like this needs a brand. It needs a temperature. Cool enoug
 
 The useful test, for me, is whether I can reread my own writing without noticing the layout. If I start fiddling with padding, the page is still louder than the sentence. If I forget the layout is there, it worked.
 
-That's all this is. A room with the lights set and the furniture against the wall. Source is [here](https://github.com/odurgut/odurgut.github.io) if you want to see how it's put together.
+That's all this is. A room with the lights set and the furniture against the wall. Source is [here](https://github.com/durguto/durguto.github.io) if you want to see how it's put together.
