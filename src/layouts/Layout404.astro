@@ -1,45 +1,30 @@
 ---
-/* 
-  This layout is used in 
-  - pages/index.astro
-  - pages/blog.astro
-  - pages/projects.astro
-*/
-
-// Import the global.css file here so that it is included on
 import "../styles/global.css";
 import ThemeScript from "./ThemeScript.astro";
 import Favicon from "./Favicon.astro";
+import DarkModeToggle from "../components/DarkModeToggle.astro";
 ---
 
 <!DOCTYPE html>
 <html class="theme-odurgut" lang="en">
-    <head>
-        <!-- Global Metadata -->
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <Favicon />
-        <slot name="meta" />
-        <ThemeScript />
-    </head>
-    <body class="max-w-3xl mx-auto min-h-screen px-6 sm:px-8">
-        <main id="main">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#ffffff" />
+    <Favicon />
+    <slot name="meta" />
+    <ThemeScript />
+  </head>
+  <body>
+    <main class="app-shell" data-layout="portfolio">
+      <div class="page-wrap">
+        <div class="page-content">
+          <article class="markdown">
             <slot name="main" />
-        </main>
-        <style>
-            body {
-                text-align: center;
-                display: grid;
-                grid-template-areas:
-                    "header"
-                    "main"
-                    "footer";
-                grid-template-rows: 5rem minmax(0, 1fr) 5rem;
-                grid-template-columns: minmax(0, 1fr);
-            }
-            main {
-                grid-area: main;
-            }
-        </style>
-    </body>
+          </article>
+        </div>
+      </div>
+      <DarkModeToggle />
+    </main>
+  </body>
 </html>

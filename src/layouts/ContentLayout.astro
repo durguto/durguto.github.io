@@ -1,144 +1,107 @@
 ---
 import "../styles/global.css";
-import { MY_NAME } from "../config";
 import ThemeScript from "./ThemeScript.astro";
 import Favicon from "./Favicon.astro";
-import Sidebar from "../components/Sidebar.astro";
-import BannerDither from "../components/BannerDither.astro";
-import TableOfContents from "../components/TableOfContents.astro";
+import LedOMark from "../components/LedOMark.astro";
+import DarkModeToggle from "../components/DarkModeToggle.astro";
+import SineDivider from "../components/SineDivider.astro";
 
 export interface Props {
-    title: string;
-    date: Date;
-    banner?: string;
+  title: string;
+  date: Date;
 }
 
-const { title, date, banner } = Astro.props;
+const { title, date } = Astro.props;
 const d = date;
 const formattedDate = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
 ---
 
 <!DOCTYPE html>
 <html class="theme-odurgut" lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <Favicon />
-        <slot name="meta" />
-        <ThemeScript />
-    </head>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <Favicon />
+    <slot name="meta" />
+    <ThemeScript />
+  </head>
 
-    <body>
-        <!-- Mobile: sidebar as top bar -->
-        <div class="lg:hidden">
-            <Sidebar />
+  <body>
+    <main class="app-shell" data-layout="post">
+      <div class="post-shell">
+        <aside class="post-mark">
+          <a href="/" class="post-mark-home unset" aria-label="Home" title="Home">
+            <LedOMark />
+          </a>
+        </aside>
+
+        <div class="page-wrap">
+          <div class="page-content">
+            <article class="markdown">
+              <header class="post-header">
+                <h1 class="post-title">{title}</h1>
+                <time class="post-date" datetime={date.toISOString()}>
+                  {formattedDate}
+                </time>
+                <SineDivider class="post-wave" />
+              </header>
+
+              <div class="prose max-w-none prose-newspaper post-body">
+                <slot name="content" />
+              </div>
+            </article>
+          </div>
         </div>
+      </div>
 
-        <!-- Desktop: 3-column grid -->
-        <div class="page-grid">
-            <div class="hidden lg:block">
-                <Sidebar />
-            </div>
-
-            <main
-                id="main"
-                class="lg:min-h-screen px-6 lg:px-8 pt-0 lg:border-l lg:border-dotted lg:border-[rgb(var(--color-border-subtle))]"
-            >
-                <section class="blog-post">
-                    {banner && <BannerDither src={banner} />}
-
-                    <!-- Post header -->
-                    <header class="post-header mb-10">
-                        <a href="/" class="unset back-link">← writing</a>
-                        <div class="meta-row mt-4">
-                            <span class="meta-label">DATE:</span>
-                            <time class="meta-value">{formattedDate}</time>
-                        </div>
-                        <div class="meta-row">
-                            <span class="meta-label">TITLE:</span>
-                            <h1 class="not-prose m-0 meta-value font-normal">{title}</h1>
-                        </div>
-                        <div class="meta-row">
-                            <span class="meta-label">AUTHOR:</span>
-                            <span class="meta-value">{MY_NAME}</span>
-                        </div>
-                        <div class="meta-sep">------</div>
-                    </header>
-
-                    <!-- Post content -->
-                    <div class="prose max-w-none prose-newspaper post-content">
-                        <slot name="content" />
-                    </div>
-                </section>
-            </main>
-
-            <div class="hidden lg:block">
-                <TableOfContents />
-            </div>
-        </div>
-    </body>
+      <div class="footer-veil" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <DarkModeToggle />
+    </main>
+  </body>
 </html>
 
 <style>
-    .back-link {
-        font-size: 1rem;
-        color: rgb(var(--color-text-muted));
-        text-decoration: none;
-        transition: color 0.15s ease;
-        display: inline-block;
-    }
+  .post-header {
+    margin-top: 0;
+    margin-bottom: calc(2.5 * var(--page-paragraph));
+  }
 
-    .back-link:hover {
-        color: rgb(var(--color-text-heading));
-    }
+  .post-date {
+    display: block;
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: var(--page-line-height);
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+  }
 
-    .post-header {
-        padding-top: 0;
-    }
+  .post-title {
+    margin: 0;
+    color: var(--text);
+    font-size: 1em;
+    font-weight: 500;
+    line-height: var(--page-line-height);
+    letter-spacing: inherit;
+  }
 
-    .meta-row {
-        display: flex;
-        align-items: baseline;
-        gap: 0;
-        line-height: 2;
-    }
+  .post-wave {
+    margin-top: calc(1.5 * var(--page-paragraph));
+  }
 
-    .meta-label {
-        font-size: 1rem;
-        color: rgb(var(--color-text-muted));
-        min-width: 6em;
-        flex-shrink: 0;
-        letter-spacing: 0.04em;
-    }
+  .post-body {
+    padding-bottom: 96px;
+  }
 
-    .meta-value {
-        font-size: 1rem;
-        color: rgb(var(--color-text-heading));
-        line-height: 2;
-    }
-
-    .meta-sep {
-        font-size: 1rem;
-        color: rgb(var(--color-border-subtle));
-        margin-top: 1.25em;
-        margin-bottom: 2em;
-        letter-spacing: 0.2em;
-    }
-
-    .page-grid {
-        display: grid;
-        grid-template-columns: 1fr 640px 1fr;
-        max-width: 1200px;
-        margin: 0 auto;
-        min-height: 100vh;
-    }
-
-    @media (max-width: 1023px) {
-        .page-grid {
-            display: block;
-            max-width: 640px;
-            margin: 0 auto;
-            min-height: 0;
-        }
-    }
+  .post-body :global(> :first-child),
+  .post-body :global(article > :first-child) {
+    margin-top: 0 !important;
+  }
 </style>

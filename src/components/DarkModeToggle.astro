@@ -1,61 +1,76 @@
 ---
 ---
 
-<mode-toggle>
-    <button
-        id="mode-toggle"
-        type="button"
-        aria-label="Toggle dark mode"
-    >
-        <span id="mode-label"></span>
-    </button>
-</mode-toggle>
+<button
+  type="button"
+  class="theme-toggle"
+  id="mode-toggle"
+  aria-label="Switch to dark mode"
+>
+  <svg
+    class="icon-moon"
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.5"
+    aria-hidden="true"
+  >
+    <path d="M13.5 9.2A5.5 5.5 0 0 1 6.8 2.5 5.6 5.6 0 1 0 13.5 9.2Z"></path>
+  </svg>
+  <svg
+    class="icon-sun"
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.5"
+    aria-hidden="true"
+    hidden
+  >
+    <circle cx="8" cy="8" r="3.25"></circle>
+    <path d="M8 1.5v1.25M8 13.25V14.5M1.5 8h1.25M13.25 8H14.5M3.22 3.22l.88.88M11.9 11.9l.88.88M3.22 12.78l.88-.88M11.9 4.1l.88-.88"></path>
+  </svg>
+</button>
 
 <script>
-    function updateHTMLTheme(mode: "light" | "dark") {
-        const themeColorMetaTag = document.head.querySelector('meta[name="theme-color"]');
-        if (mode === "dark") {
-            document.documentElement.classList.remove("light");
-            document.documentElement.classList.add("dark");
-            // @ts-ignore
-            if (themeColorMetaTag) themeColorMetaTag.content = "#0a0a0a";
-        } else {
-            document.documentElement.classList.remove("dark");
-            document.documentElement.classList.add("light");
-            // @ts-ignore
-            if (themeColorMetaTag) themeColorMetaTag.content = "#ffffff";
-        }
+  function updateHTMLTheme(mode: "light" | "dark") {
+    const themeColorMetaTag = document.head.querySelector(
+      'meta[name="theme-color"]'
+    );
+    const toggle = document.getElementById("mode-toggle");
+    const moon = toggle?.querySelector<SVGElement>(".icon-moon");
+    const sun = toggle?.querySelector<SVGElement>(".icon-sun");
+
+    if (mode === "dark") {
+      document.documentElement.classList.remove("light");
+      document.documentElement.classList.add("dark");
+      if (themeColorMetaTag) themeColorMetaTag.setAttribute("content", "#111111");
+      if (toggle) toggle.setAttribute("aria-label", "Switch to light mode");
+      if (moon) moon.hidden = true;
+      if (sun) sun.hidden = false;
+    } else {
+      document.documentElement.classList.remove("dark");
+      document.documentElement.classList.add("light");
+      if (themeColorMetaTag) themeColorMetaTag.setAttribute("content", "#ffffff");
+      if (toggle) toggle.setAttribute("aria-label", "Switch to dark mode");
+      if (moon) moon.hidden = false;
+      if (sun) sun.hidden = true;
     }
+  }
 
-    function updateStorageTheme(mode: "light" | "dark") {
-        sessionStorage.setItem("theme", mode);
-    }
+  function updateStorageTheme(mode: "light" | "dark") {
+    sessionStorage.setItem("theme", mode);
+  }
 
-    class ModeToggle extends HTMLElement {
-        constructor() {
-            super();
-            let currentMode: "light" | "dark" = document.documentElement.classList.contains("dark")
-                ? "dark"
-                : "light";
+  const toggle = document.getElementById("mode-toggle");
+  let currentMode: "light" | "dark" =
+    document.documentElement.classList.contains("dark") ? "dark" : "light";
 
-            const toggle = this.querySelector<HTMLButtonElement>("#mode-toggle");
-            const label = this.querySelector<HTMLSpanElement>("#mode-label");
+  updateHTMLTheme(currentMode);
 
-            const render = () => {
-                if (label) label.textContent = currentMode === "dark" ? "[ light ]" : "[ dark ]";
-            };
-
-            render();
-
-            toggle?.addEventListener("click", () => {
-                const next: "light" | "dark" = currentMode === "dark" ? "light" : "dark";
-                updateHTMLTheme(next);
-                updateStorageTheme(next);
-                currentMode = next;
-                render();
-            });
-        }
-    }
-
-    customElements.define("mode-toggle", ModeToggle);
+  toggle?.addEventListener("click", () => {
+    const next: "light" | "dark" = currentMode === "dark" ? "light" : "dark";
+    updateHTMLTheme(next);
+    updateStorageTheme(next);
+    currentMode = next;
+  });
 </script>

@@ -5,10 +5,10 @@ import { SITE_TITLE } from "../config";
 ---
 
 <Layout404>
-    <PageMeta title={`${SITE_TITLE}`} slot="meta" />
-    <Fragment slot="main">
-        <div class="text-8xl">404</div>
-        <div class="text-2xl">NOT FOUND</div>
-        <div class="mt-4"><a href="/">Back to home</a></div>
-    </Fragment>
+  <PageMeta title={`404 · ${SITE_TITLE}`} slot="meta" />
+  <Fragment slot="main">
+    <p><strong>404</strong></p>
+    <p>Page not found.</p>
+    <p class="gap-lg"><a href="/">← home</a></p>
+  </Fragment>
 </Layout404>

@@ -1,70 +1,17 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&display=swap");
+
 @font-face {
-    font-family: 'Ioskeley Mono';
-    src: url('/fonts/IoskeleyMono-Regular.woff2') format('woff2');
-    font-weight: 400;
+    font-family: "Geist";
+    src: url("/fonts/geist/Geist-Variable.woff2") format("woff2");
+    font-weight: 100 900;
     font-style: normal;
     font-display: swap;
 }
+
 @font-face {
-    font-family: 'Ioskeley Mono';
-    src: url('/fonts/IoskeleyMono-Italic.woff2') format('woff2');
-    font-weight: 400;
-    font-style: italic;
-    font-display: swap;
-}
-@font-face {
-    font-family: 'Ioskeley Mono';
-    src: url('/fonts/IoskeleyMono-Light.woff2') format('woff2');
-    font-weight: 300;
-    font-style: normal;
-    font-display: swap;
-}
-@font-face {
-    font-family: 'Ioskeley Mono';
-    src: url('/fonts/IoskeleyMono-LightItalic.woff2') format('woff2');
-    font-weight: 300;
-    font-style: italic;
-    font-display: swap;
-}
-@font-face {
-    font-family: 'Ioskeley Mono';
-    src: url('/fonts/IoskeleyMono-Medium.woff2') format('woff2');
-    font-weight: 500;
-    font-style: normal;
-    font-display: swap;
-}
-@font-face {
-    font-family: 'Ioskeley Mono';
-    src: url('/fonts/IoskeleyMono-MediumItalic.woff2') format('woff2');
-    font-weight: 500;
-    font-style: italic;
-    font-display: swap;
-}
-@font-face {
-    font-family: 'Ioskeley Mono';
-    src: url('/fonts/IoskeleyMono-SemiBold.woff2') format('woff2');
-    font-weight: 600;
-    font-style: normal;
-    font-display: swap;
-}
-@font-face {
-    font-family: 'Ioskeley Mono';
-    src: url('/fonts/IoskeleyMono-SemiBoldItalic.woff2') format('woff2');
-    font-weight: 600;
-    font-style: italic;
-    font-display: swap;
-}
-@font-face {
-    font-family: 'Ioskeley Mono';
-    src: url('/fonts/IoskeleyMono-Bold.woff2') format('woff2');
-    font-weight: 700;
-    font-style: normal;
-    font-display: swap;
-}
-@font-face {
-    font-family: 'Ioskeley Mono';
-    src: url('/fonts/IoskeleyMono-BoldItalic.woff2') format('woff2');
-    font-weight: 700;
+    font-family: "Geist";
+    src: url("/fonts/geist/Geist-Italic-Variable.woff2") format("woff2");
+    font-weight: 100 900;
     font-style: italic;
     font-display: swap;
 }
@@ -73,220 +20,711 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 
-    Tailwind colors listed here: https://tailwindcss.com/docs/customizing-colors
-    
-    Why colors are written in rgb format (255 255 255) instead of hex (#ffffff)
-    https://tailwindcss.com/docs/customizing-colors#using-css-variables 
-*/
 @layer base {
-    /* light theme */
-    .theme-odurgut {
-        --color-primary-main: 10 10 10;
-
-        --color-my-color: 10 10 10;
-        --color-text-body: 40 38 35;
-        --color-text-heading: 0 0 0;
-        --color-text-bold: 10 10 10;
-        --color-text-muted: 115 115 115;
-        --color-text-link: 10 10 10;
-        --color-text-code: 10 10 10;
-        --color-text-selection: 255 255 255;
-
-        --color-bg-body: 247 247 248;
-        --color-bg-code: 237 237 239;
-        --color-bg-selection: 10 10 10;
-
-        --color-border-code: 210 210 213;
-        --color-border-subtle: 210 210 213;
-        --color-bg-card: 250 250 250;
-    }
-
-    /* dark theme */
-    .theme-odurgut.dark {
-        --color-primary-main: 255 255 255;
-
-        --color-my-color: 200 200 200;
-        --color-text-body: 185 183 179;
-        --color-text-heading: 255 255 255;
-        --color-text-bold: 240 240 240;
-        --color-text-muted: 120 120 120;
-        --color-text-link: 220 220 220;
-        --color-text-code: 220 220 220;
-        --color-text-selection: 10 10 10;
-
-        --color-bg-body: 10 10 10;
-        --color-bg-code: 24 24 24;
-        --color-bg-selection: 220 220 220;
-
-        --color-border-code: 40 40 40;
-        --color-border-subtle: 30 30 30;
-        --color-bg-card: 17 17 17;
-    }
-
     :root {
-        font-size: 12px;
-        font-family: theme("fontFamily.body");
-        background-color: theme("colors.bg.body");
-        color: theme("colors.text.body");
-        line-height: 1.7;
-        scroll-behavior: smooth;
-        transition: background-color 0.2s ease;
+        --background: #ffffff;
+        --border: #ededed;
+        --text: #111111;
+        --muted: #888888;
+        --subtle: #888888;
+        --link: #2684ff;
+        --code: #f0f0f0;
+        --syntax-pink: #e9348b;
+        --syntax-green: #12a566;
+        --syntax-blue: #2684ff;
+        --background-overlay: rgb(255 255 255 / 0.2);
+        --media-edge: rgb(0 0 0 / 0.15);
+        --page-font-family: "Geist", ui-sans-serif, system-ui, sans-serif;
+        --page-font-size: 15px;
+        --page-line-height: 20.5px;
+        --page-paragraph: 14px;
+        --page-letter-spacing: -0.3px;
+        --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        --led-off: #c8c8c8;
+        --led-on: #111111;
+
+        /* Tailwind bridge */
+        --color-primary-main: 17 17 17;
+        --color-text-body: 17 17 17;
+        --color-text-heading: 17 17 17;
+        --color-text-bold: 17 17 17;
+        --color-text-muted: 136 136 136;
+        --color-text-link: 38 132 255;
+        --color-text-code: 17 17 17;
+        --color-text-selection: 255 255 255;
+        --color-bg-body: 255 255 255;
+        --color-bg-code: 240 240 240;
+        --color-bg-selection: 17 17 17;
+        --color-border-code: 237 237 237;
+        --color-border-subtle: 237 237 237;
+    }
+
+    html.dark {
+        --background: #111111;
+        --border: #2a2a2a;
+        --text: #eeeeee;
+        --muted: #888888;
+        --subtle: #888888;
+        --link: #6bb0ff;
+        --code: #1c1c1c;
+        --syntax-pink: #ff5cad;
+        --syntax-green: #3dd68c;
+        --syntax-blue: #6bb0ff;
+        --background-overlay: rgb(17 17 17 / 0.4);
+        --media-edge: rgb(255 255 255 / 0.15);
+        --led-off: #2a2a2a;
+        --led-on: #eeeeee;
+
+        --color-primary-main: 238 238 238;
+        --color-text-body: 238 238 238;
+        --color-text-heading: 238 238 238;
+        --color-text-bold: 238 238 238;
+        --color-text-muted: 136 136 136;
+        --color-text-link: 107 176 255;
+        --color-text-code: 238 238 238;
+        --color-text-selection: 17 17 17;
+        --color-bg-body: 17 17 17;
+        --color-bg-code: 28 28 28;
+        --color-bg-selection: 238 238 238;
+        --color-border-code: 42 42 42;
+        --color-border-subtle: 42 42 42;
+    }
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+    html,
+    body {
+        min-height: 100%;
+        margin: 0;
+        background: var(--background);
+        color: var(--text);
+        font-family: var(--page-font-family);
+        font-size: var(--page-font-size);
+        line-height: var(--page-line-height);
+        letter-spacing: var(--page-letter-spacing);
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
-        font-feature-settings: "calt" 1, "zero" 1;
+        scroll-behavior: smooth;
     }
 
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-        font-family: theme("fontFamily.heading");
-    }
-}
-
-@layer components {
-    /* ------ GLOBAL STYLES - START ------ */
-    strong {
-        font-weight: 600;
-        color: theme("colors.text.bold");
+    ::selection {
+        background: var(--text);
+        color: var(--background);
     }
 
-    mark {
-        background-color: theme("colors.bg.selection");
-        color: theme("colors.text.selection");
+    a {
+        color: var(--link);
+        text-decoration: none;
     }
 
-    /* 
-        if you want an anchor tag to not have this style, 
-        just add a class `unset` to it. 
-    */
-    a:not(.unset) {
+    a:hover {
         text-decoration: underline;
-        text-underline-offset: 2px;
-        text-decoration-color: rgb(var(--color-border-code));
-        text-decoration-thickness: 1px;
-        transition: opacity 0.15s ease;
     }
 
-    a:not(.unset):hover {
-        opacity: 0.6;
+    strong {
+        font-weight: 500;
+        color: var(--text);
+    }
+
+    em {
+        font-weight: 400;
+        font-style: italic;
     }
 
     code:not(pre code):not(.unset) {
-        background-color: theme("colors.bg.code");
-        color: theme("colors.text.code");
-        padding: 0.1em 0.3em;
-        border-radius: 0;
-        font-size: 1em;
+        background: var(--code);
+        color: var(--text);
+        border-radius: 2px;
+        padding: 1px 4px;
+        font-family: var(--font-mono);
+        font-size: 13px;
+        letter-spacing: 0;
+        border: 0;
         font-weight: 400;
-        border: 1px solid theme("colors.border.code");
-        font-family: inherit;
     }
 
-    html.dark code:not(pre code) {
-        background-color: rgb(var(--color-bg-code));
-        border-color: rgb(var(--color-border-code));
+    mark {
+        background: var(--text);
+        color: var(--background);
     }
 
     kbd {
         display: inline-block;
-        padding: 0.1em 0.35em;
-        border: 1px solid rgb(var(--color-border-code));
-        background: rgb(var(--color-bg-code));
-        color: rgb(var(--color-text-body));
-        font-family: inherit;
-        font-size: 1em;
+        padding: 0.1em 0.4em;
+        border: 1px solid var(--border);
+        background: var(--code);
+        color: var(--text);
+        font-family: var(--font-mono);
+        font-size: 13px;
         line-height: 1.4;
-        border-radius: 0;
+        letter-spacing: 0;
+        border-radius: 2px;
+        font-weight: 400;
     }
 
-    html.dark kbd {
-        background: rgb(var(--color-bg-code));
-        color: rgb(var(--color-text-body));
-        border-color: rgb(var(--color-border-code));
+    .prose kbd,
+    .markdown kbd {
+        color: var(--text);
+        background-color: var(--code);
+        border: 1px solid var(--border);
+        border-radius: 2px;
+        padding: 0.1em 0.4em;
+        font-family: var(--font-mono);
+        font-weight: 400;
+        box-shadow: none;
     }
+}
 
-    ul:not(.unset):not(:where([class~="prose"] *)) {
-        padding-left: 0;
-        list-style: none;
-    }
-
-    ul:not(:where([class~="prose"] *)) > li {
+@layer components {
+    .app-shell {
         position: relative;
-        padding-left: 1.375rem;
+        min-height: 100svh;
+        padding: 72px 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
     }
 
-    ul:not(.unset):not(:where([class~="prose"] *)) > li::before {
+    .app-shell[data-layout="portfolio"] {
+        justify-content: safe center;
+    }
+
+    .app-shell[data-layout="post"] {
+        align-items: stretch;
+    }
+
+    .page-wrap {
+        width: 100%;
+        max-width: 450px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .post-shell {
+        position: relative;
+        width: 100%;
+        max-width: 450px;
+        margin: 0 auto;
+    }
+
+    .post-mark {
         position: absolute;
-        left: 0;
-        content: "⌾";
-        color: rgb(var(--color-text-muted));
+        top: 0;
+        bottom: 0;
+        left: -69px;
+        width: 41px;
+        pointer-events: none;
     }
 
-    ol:not(.unset):not(:where([class~="prose"] *)) {
-        padding-left: 1.125rem;
-    }
-
-    ol:not(.unset):not(:where([class~="prose"] *)) > li::marker {
-        color: rgb(var(--color-text-muted));
-    }
-
-    ul:not(.unset):not(:where([class~="prose"] *)) > li,
-    ol:not(.unset):not(:where([class~="prose"] *)) > li {
-        margin-top: 0.5em;
-        margin-bottom: 0.5em;
-    }
-
-    ::selection {
-        background: theme("colors.bg.selection");
-        color: theme("colors.text.selection");
-    }
-
-    /* ------ GLOBAL STYLES - END ------ */
-
-    /* ------ REUSABLE UTILS - START ------ */
-    .post-content {
-        font-size: 1rem; /* 12px (root = 12px) */
-        line-height: 1.85;
-    }
-
-    .post-content p {
-        margin-top: 1.25em;
-        margin-bottom: 1.25em;
-    }
-
-    .post-content h1,
-    .post-content h2 {
-        font-weight: 600;
-    }
-
-    .post-content h3,
-    .post-content h4,
-    .post-content h5,
-    .post-content h6 {
-        font-size: 1rem;
-        font-weight: 500;
-    }
-
-    .animated-link {
-        position: relative;
+    .post-mark-home {
+        position: sticky;
+        top: 72px;
+        display: inline-flex;
+        line-height: 0;
+        color: inherit;
         text-decoration: none;
-        font-size: 1rem;
-        color: rgb(var(--color-text-muted));
-        transition: color 0.15s ease;
+        pointer-events: auto;
     }
 
-    .animated-link:hover {
-        color: rgb(var(--color-text-heading));
+    .post-mark-home:hover {
+        text-decoration: none;
+        opacity: 0.7;
     }
 
-    .animated-link.show {
-        color: rgb(var(--color-text-heading));
+    .page-content {
+        flex: none;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .profile-header {
+        margin-bottom: 0;
+    }
+
+    .profile-navigation {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 48px;
+        font-size: var(--page-font-size);
+        line-height: var(--page-line-height);
+        letter-spacing: var(--page-letter-spacing);
+    }
+
+    .profile-navigation a {
+        color: var(--muted);
+        white-space: nowrap;
+        text-decoration: none;
+    }
+
+    .profile-navigation a[aria-current="page"],
+    .profile-navigation a:hover {
+        color: var(--text);
+        text-decoration: none;
+    }
+
+    .markdown {
+        padding: 0;
+        color: var(--text);
+        font-size: var(--page-font-size);
+        line-height: var(--page-line-height);
+        letter-spacing: var(--page-letter-spacing);
+        overflow-wrap: anywhere;
+    }
+
+    .markdown > :first-child {
+        margin-top: 0 !important;
+    }
+
+    .markdown > :last-child {
+        margin-bottom: 0;
+    }
+
+    .markdown p,
+    .markdown ul,
+    .markdown ol,
+    .markdown blockquote,
+    .markdown table,
+    .markdown hr,
+    .markdown .code-wrap {
+        margin: 0;
+        letter-spacing: inherit;
+    }
+
+    /* Nomo rhythm: 1 unit between related blocks, 3 before section titles */
+    .markdown p + p,
+    .markdown p + ul,
+    .markdown p + ol,
+    .markdown p + blockquote,
+    .markdown p + .code-wrap,
+    .markdown ul + p,
+    .markdown ol + p,
+    .markdown blockquote + p,
+    .markdown .code-wrap + p,
+    .markdown h1 + p,
+    .markdown h2 + p,
+    .markdown h3 + p,
+    .markdown h4 + p,
+    .markdown h1 + ul,
+    .markdown h2 + ul,
+    .markdown h3 + ul,
+    .markdown h1 + .code-wrap,
+    .markdown h2 + .code-wrap,
+    .markdown h3 + .code-wrap {
+        margin-top: var(--page-paragraph);
+    }
+
+    .markdown .gap-lg {
+        margin-top: calc(3 * var(--page-paragraph));
+    }
+
+    .markdown .post-body p,
+    .markdown .post-body ul,
+    .markdown .post-body ol,
+    .markdown .post-body blockquote,
+    .markdown .post-body .code-wrap {
+        margin-top: var(--page-paragraph);
+        margin-bottom: 0;
+    }
+
+    .markdown .post-body > :first-child,
+    .markdown .post-body article > :first-child {
+        margin-top: 0 !important;
+    }
+
+    .markdown a {
+        color: var(--link);
+        font-weight: 400;
+    }
+
+    .markdown :is(h1, h2, h3, h4, h5, h6) a {
+        color: inherit;
+        font-weight: inherit;
+        text-decoration: none;
+    }
+
+    .markdown :is(h1, h2, h3, h4, h5, h6) a:hover {
+        text-decoration: none;
+        opacity: 1;
+    }
+
+    .markdown a:hover {
+        text-decoration: underline;
+        opacity: 1;
+    }
+
+    .markdown a.ext {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.1rem;
+    }
+
+    .markdown a.ext svg {
+        flex: 0 0 auto;
+        width: 12px;
+        height: 12px;
+    }
+
+    .markdown .muted {
+        color: var(--muted);
+    }
+
+    .markdown .small {
+        font-size: 0.85em;
+    }
+
+    .markdown ul {
+        list-style: none;
+        padding-left: 1.1em;
+    }
+
+    .markdown ul > li {
+        position: relative;
+    }
+
+    .markdown ul > li::before {
+        content: "";
+        position: absolute;
+        left: -0.85em;
+        top: calc((var(--page-line-height) / 2) - 1.5px);
+        width: 3px;
+        height: 3px;
+        background: currentColor;
+    }
+
+    .markdown li + li {
+        margin-top: 0.18em;
+    }
+
+    .markdown blockquote {
+        margin-left: 0;
+        border-left: 3px solid var(--border);
+        padding-left: 0.75rem;
+        color: var(--muted);
+    }
+
+    .markdown hr {
+        border: 0;
+        border-top: 1px solid var(--border);
+        margin: calc(2 * var(--page-paragraph)) 0;
+    }
+
+    .markdown h1,
+    .markdown h2,
+    .markdown h3,
+    .markdown h4,
+    .markdown h5,
+    .markdown h6 {
+        margin: 0;
+        color: var(--text);
+        font-weight: 500;
+        font-size: 1em;
+        line-height: var(--page-line-height);
+        letter-spacing: inherit;
+    }
+
+    .markdown .post-body h1,
+    .markdown .post-body h2,
+    .markdown .post-body h3,
+    .markdown .post-body h4 {
+        margin-top: calc(3 * var(--page-paragraph));
+        margin-bottom: 0;
         font-weight: 500;
     }
 
-    /* ------ REUSABLE UTILS - END ------ */
+    .markdown .post-body h5,
+    .markdown .post-body h6 {
+        margin-top: calc(2 * var(--page-paragraph));
+        font-weight: 500;
+        color: var(--muted);
+    }
+
+    .markdown h5 {
+        color: var(--muted);
+        font-weight: 500;
+    }
+
+    .markdown h6 {
+        color: var(--subtle);
+        font-weight: 500;
+        font-size: 0.85em;
+    }
+
+    .post-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35em;
+    }
+
+    .post-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 16px;
+        width: 100%;
+    }
+
+    .post-row a {
+        color: var(--link);
+        text-decoration: none;
+        min-width: 0;
+    }
+
+    .post-row a:hover {
+        text-decoration: underline;
+    }
+
+    .post-row time {
+        color: var(--muted);
+        font-size: 0.85em;
+        white-space: nowrap;
+        flex-shrink: 0;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .app-footer {
+        position: fixed;
+        bottom: 16px;
+        left: 24px;
+        margin: 0;
+        padding: 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: var(--page-line-height);
+        letter-spacing: var(--page-letter-spacing);
+        white-space: nowrap;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: 0.3em;
+    }
+
+    .app-footer a {
+        color: var(--link);
+        font-weight: 400;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.1rem;
+        text-decoration: none;
+    }
+
+    .app-footer a:hover {
+        text-decoration: underline;
+    }
+
+    .app-footer a svg {
+        width: 12px;
+        height: 12px;
+    }
+
+    .footer-veil {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 180px;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    /* Soft fog — no hard edge */
+    .footer-veil::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            to top,
+            var(--background) 0%,
+            color-mix(in srgb, var(--background) 72%, transparent) 22%,
+            color-mix(in srgb, var(--background) 38%, transparent) 48%,
+            color-mix(in srgb, var(--background) 12%, transparent) 72%,
+            transparent 100%
+        );
+    }
+
+    .footer-veil span {
+        position: absolute;
+        inset: 0;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-size: 100% 100%;
+        mask-size: 100% 100%;
+    }
+
+    /* Apple-ish progressive blur: soft ramps, blur grows toward the bottom */
+    .footer-veil span:nth-child(1) {
+        -webkit-mask-image: linear-gradient(
+            to top,
+            #000 0%,
+            rgba(0, 0, 0, 0.55) 40%,
+            transparent 100%
+        );
+        mask-image: linear-gradient(
+            to top,
+            #000 0%,
+            rgba(0, 0, 0, 0.55) 40%,
+            transparent 100%
+        );
+        -webkit-backdrop-filter: blur(4px);
+        backdrop-filter: blur(4px);
+    }
+    .footer-veil span:nth-child(2) {
+        -webkit-mask-image: linear-gradient(
+            to top,
+            #000 0%,
+            rgba(0, 0, 0, 0.65) 28%,
+            transparent 70%
+        );
+        mask-image: linear-gradient(
+            to top,
+            #000 0%,
+            rgba(0, 0, 0, 0.65) 28%,
+            transparent 70%
+        );
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+    }
+    .footer-veil span:nth-child(3) {
+        -webkit-mask-image: linear-gradient(
+            to top,
+            #000 0%,
+            rgba(0, 0, 0, 0.7) 18%,
+            transparent 48%
+        );
+        mask-image: linear-gradient(
+            to top,
+            #000 0%,
+            rgba(0, 0, 0, 0.7) 18%,
+            transparent 48%
+        );
+        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px);
+    }
+    .footer-veil span:nth-child(4) {
+        -webkit-mask-image: linear-gradient(
+            to top,
+            #000 0%,
+            rgba(0, 0, 0, 0.85) 10%,
+            transparent 30%
+        );
+        mask-image: linear-gradient(
+            to top,
+            #000 0%,
+            rgba(0, 0, 0, 0.85) 10%,
+            transparent 30%
+        );
+        -webkit-backdrop-filter: blur(36px);
+        backdrop-filter: blur(36px);
+    }
+    .footer-veil span:nth-child(5) {
+        -webkit-mask-image: linear-gradient(
+            to top,
+            #000 0%,
+            transparent 16%
+        );
+        mask-image: linear-gradient(to top, #000 0%, transparent 16%);
+        -webkit-backdrop-filter: blur(48px);
+        backdrop-filter: blur(48px);
+    }
+    .footer-veil span:nth-child(6),
+    .footer-veil span:nth-child(7),
+    .footer-veil span:nth-child(8) {
+        display: none;
+    }
+
+    .theme-toggle {
+        position: fixed;
+        bottom: 16px;
+        right: 24px;
+        z-index: 2;
+        display: grid;
+        place-items: center;
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: var(--muted);
+        cursor: pointer;
+    }
+
+    .theme-toggle:hover {
+        color: var(--text);
+    }
+
+    .theme-toggle:active {
+        transform: scale(0.96);
+    }
+
+    .theme-toggle svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .markdown a.back-link,
+    .back-link {
+        color: var(--muted);
+        text-decoration: none;
+        font-size: var(--page-font-size);
+    }
+
+    .markdown a.back-link:hover,
+    .back-link:hover {
+        color: var(--text);
+        text-decoration: none;
+    }
+
+    .post-meta {
+        color: var(--muted);
+        font-size: 0.85em;
+        margin-top: 0.25em;
+    }
+
+    @media (max-width: 540px) {
+        .app-shell {
+            padding: 72px 28px;
+        }
+
+        .post-shell {
+            max-width: 450px;
+        }
+
+        .post-mark {
+            position: static;
+            width: auto;
+            left: auto;
+            bottom: auto;
+            margin-bottom: 20px;
+            pointer-events: auto;
+        }
+
+        .post-mark-home {
+            position: static;
+            top: auto;
+        }
+
+        .app-footer {
+            left: 28px;
+        }
+
+        .theme-toggle {
+            right: 28px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .theme-toggle:active {
+            transform: none;
+        }
+
+        .footer-veil {
+            display: none;
+        }
+    }
 }

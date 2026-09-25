@@ -1,0 +1,51 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className = "" } = Astro.props;
+
+const WAVE_W = 720;
+const WAVE_H = 12;
+const WAVE_AMP = 3.2;
+const WAVE_CYCLES = 16.5;
+const waveMid = WAVE_H / 2;
+const waveSamples = WAVE_W;
+const waveParts: string[] = [];
+for (let i = 0; i <= waveSamples; i++) {
+  const t = i / waveSamples;
+  const y =
+    i === 0 || i === waveSamples
+      ? waveMid
+      : waveMid + Math.sin(t * WAVE_CYCLES * Math.PI * 2) * WAVE_AMP;
+  waveParts.push(`${i === 0 ? "M" : "L"}${i} ${y.toFixed(2)}`);
+}
+const wavePath = waveParts.join(" ");
+---
+
+<svg
+  class:list={["sine-wave", className]}
+  viewBox={`0 0 ${WAVE_W} ${WAVE_H}`}
+  preserveAspectRatio="none"
+  aria-hidden="true"
+>
+  <path
+    d={wavePath}
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.15"
+    stroke-linecap="butt"
+    stroke-linejoin="round"
+    vector-effect="non-scaling-stroke"
+  ></path>
+</svg>
+
+<style>
+  .sine-wave {
+    display: block;
+    width: 100%;
+    height: 12px;
+    color: var(--muted);
+    opacity: 0.42;
+  }
+</style>

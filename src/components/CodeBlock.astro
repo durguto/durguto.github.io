@@ -5,185 +5,223 @@ const { language, content } = Astro.props;
 ---
 
 <div class="code-wrap">
-    <Prism lang={language} code={content} />
-    <button class="copy-btn" aria-label="Copy code">[ copy ]</button>
+  <Prism lang={language} code={content} />
+  <button class="copy-btn" type="button" aria-label="Copy">
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.75"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+    </svg>
+  </button>
 </div>
 
 <script>
-    document.querySelectorAll<HTMLDivElement>(".code-wrap").forEach((wrap) => {
-        const btn = wrap.querySelector<HTMLButtonElement>(".copy-btn");
-        const pre = wrap.querySelector("pre");
+  document.querySelectorAll<HTMLDivElement>(".code-wrap").forEach((wrap) => {
+    const btn = wrap.querySelector<HTMLButtonElement>(".copy-btn");
+    const pre = wrap.querySelector("pre");
 
-        btn?.addEventListener("click", async () => {
-            const text = pre?.textContent ?? "";
-            try {
-                await navigator.clipboard.writeText(text);
-                if (btn) btn.textContent = "[ done ]";
-            } catch {
-                if (btn) btn.textContent = "[ err  ]";
-            }
-            setTimeout(() => {
-                if (btn) btn.textContent = "[ copy ]";
-            }, 1500);
-        });
+    btn?.addEventListener("click", async () => {
+      const text = pre?.textContent ?? "";
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.setAttribute("aria-label", "Copied");
+      } catch {
+        btn.setAttribute("aria-label", "Error");
+      }
+      setTimeout(() => {
+        btn?.setAttribute("aria-label", "Copy");
+      }, 1500);
     });
+  });
 </script>
 
 <style is:global>
-    .code-wrap {
-        position: relative;
-    }
+  .code-wrap {
+    position: relative;
+    margin: var(--page-paragraph) 0 0;
+    background: var(--code);
+    border-radius: 2px;
+  }
 
+  .copy-btn {
+    position: absolute;
+    top: 5px;
+    right: 6px;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    color: var(--muted);
+    background: transparent;
+    border: 0;
+    border-radius: 2px;
+    cursor: pointer;
+    opacity: 0;
+    transition: color 0.15s, background-color 0.15s, opacity 0.15s;
+  }
+
+  .code-wrap:hover .copy-btn,
+  .copy-btn:focus-visible {
+    opacity: 1;
+  }
+
+  .copy-btn:hover {
+    color: var(--text);
+    background: var(--border);
+  }
+
+  .copy-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  code[class*="language-"],
+  pre[class*="language-"] {
+    background: none;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.6;
+    letter-spacing: 0;
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+  }
+
+  pre[class*="language-"] {
+    padding: 8px 42px 8px 12px;
+    margin: 0;
+    overflow: auto;
+    border-radius: 2px;
+    border: 0;
+    background: transparent !important;
+  }
+
+  :not(pre) > code[class*="language-"] {
+    padding: 1px 4px;
+    border-radius: 2px;
+    white-space: normal;
+    background: var(--code);
+  }
+
+  /* Light syntax — muted, Nomo-like */
+  :not(.dark) code[class*="language-"] {
+    color: var(--text);
+  }
+
+  :not(.dark) .token.comment,
+  :not(.dark) .token.prolog,
+  :not(.dark) .token.doctype,
+  :not(.dark) .token.cdata {
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  :not(.dark) .token.punctuation {
+    color: var(--muted);
+  }
+
+  :not(.dark) .token.property,
+  :not(.dark) .token.tag,
+  :not(.dark) .token.boolean,
+  :not(.dark) .token.number,
+  :not(.dark) .token.constant,
+  :not(.dark) .token.attr-name {
+    color: var(--text);
+  }
+
+  :not(.dark) .token.string,
+  :not(.dark) .token.char,
+  :not(.dark) .token.builtin,
+  :not(.dark) .token.attr-value,
+  :not(.dark) .token.inserted {
+    color: var(--syntax-green);
+  }
+
+  :not(.dark) .token.operator,
+  :not(.dark) .token.entity {
+    color: var(--muted);
+  }
+
+  :not(.dark) .token.atrule,
+  :not(.dark) .token.keyword {
+    color: var(--syntax-pink);
+  }
+
+  :not(.dark) .token.function,
+  :not(.dark) .token.class-name {
+    color: var(--text);
+  }
+
+  :not(.dark) .token.url,
+  :not(.dark) .token.property-access,
+  :not(.dark) .token.variable {
+    color: var(--syntax-blue);
+  }
+
+  /* Dark syntax */
+  .dark code[class*="language-"] {
+    color: var(--text);
+  }
+
+  .dark .token.comment,
+  .dark .token.prolog,
+  .dark .token.doctype,
+  .dark .token.cdata {
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .dark .token.punctuation {
+    color: var(--muted);
+  }
+
+  .dark .token.string,
+  .dark .token.char,
+  .dark .token.builtin,
+  .dark .token.attr-value,
+  .dark .token.inserted {
+    color: var(--syntax-green);
+  }
+
+  .dark .token.atrule,
+  .dark .token.keyword {
+    color: var(--syntax-pink);
+  }
+
+  .dark .token.url,
+  .dark .token.property-access,
+  .dark .token.variable {
+    color: var(--syntax-blue);
+  }
+
+  .token.important,
+  .token.bold {
+    font-weight: 600;
+  }
+  .token.italic {
+    font-style: italic;
+  }
+
+  @media (hover: none) {
     .copy-btn {
-        position: absolute;
-        top: 0.5em;
-        right: 0.5em;
-        display: none;
-        font-size: 1rem;
-        font-family: 'Ioskeley Mono', ui-monospace, monospace;
-        color: rgb(var(--color-text-muted));
-        background: rgb(var(--color-bg-code));
-        border: 1px solid rgb(var(--color-border-code));
-        padding: 0.15em 0.5em;
-        cursor: pointer;
-        line-height: 1.5;
-        transition: color 0.15s ease;
+      opacity: 0.7;
     }
-
-    .copy-btn:hover {
-        color: rgb(var(--color-text-heading));
-    }
-
-    .code-wrap:hover .copy-btn {
-        display: block;
-    }
-    code[class*="language-"],
-    pre[class*="language-"] {
-        background: none;
-        font-family: 'Ioskeley Mono', ui-monospace, Consolas, Monaco, monospace;
-        font-size: 12px;
-        text-align: left;
-        white-space: pre;
-        word-spacing: normal;
-        word-break: normal;
-        word-wrap: normal;
-        line-height: 1.65;
-        -moz-tab-size: 4;
-        -o-tab-size: 4;
-        tab-size: 4;
-        -webkit-hyphens: none;
-        -moz-hyphens: none;
-        -ms-hyphens: none;
-        hyphens: none;
-        font-feature-settings: "calt" 1, "zero" 1;
-    }
-
-    pre[class*="language-"] {
-        padding: 1em;
-        margin: 0.5em 0;
-        overflow: auto;
-        border-radius: 0;
-        border: 1px solid rgb(var(--color-border-code));
-        background: rgb(var(--color-bg-code)) !important;
-    }
-
-    :not(pre) > code[class*="language-"],
-    pre[class*="language-"] {
-        background: rgb(var(--color-bg-code));
-    }
-
-    :not(pre) > code[class*="language-"] {
-        padding: 0.1em 0.3em;
-        border-radius: 0;
-        white-space: normal;
-    }
-
-    pre[class*="language-"]::selection,
-    pre[class*="language-"] ::selection,
-    code[class*="language-"]::selection,
-    code[class*="language-"] ::selection {
-        background: rgb(var(--color-bg-selection) / 0.3);
-    }
-
-    /* ── Light mode syntax (dark text on warm light bg) ── */
-    :not(.dark) code[class*="language-"] { color: #3a3733; }
-
-    :not(.dark) .token.comment,
-    :not(.dark) .token.prolog,
-    :not(.dark) .token.doctype,
-    :not(.dark) .token.cdata        { color: #b8b4ae; font-style: italic; }
-
-    :not(.dark) .token.punctuation  { color: #8a8783; }
-
-    :not(.dark) .token.property,
-    :not(.dark) .token.tag,
-    :not(.dark) .token.boolean,
-    :not(.dark) .token.number,
-    :not(.dark) .token.constant,
-    :not(.dark) .token.attr-name    { color: #4a4743; }
-
-    :not(.dark) .token.string,
-    :not(.dark) .token.char,
-    :not(.dark) .token.builtin,
-    :not(.dark) .token.attr-value,
-    :not(.dark) .token.inserted     { color: #5a5753; }
-
-    :not(.dark) .token.operator,
-    :not(.dark) .token.entity       { color: #7a7773; }
-
-    :not(.dark) .token.atrule,
-    :not(.dark) .token.keyword      { color: #0a0806; font-weight: 600; }
-
-    :not(.dark) .token.function,
-    :not(.dark) .token.class-name   { color: #1a1816; font-weight: 500; }
-
-    :not(.dark) .token.property-access,
-    :not(.dark) .token.variable     { color: #2a2723; }
-
-    :not(.dark) .token.deleted,
-    :not(.dark) .token.important    { color: #5a5753; }
-
-    /* ── Dark mode syntax (light text on warm dark bg) ── */
-    .dark code[class*="language-"]  { color: #b8b5b0; }
-
-    .dark .token.comment,
-    .dark .token.prolog,
-    .dark .token.doctype,
-    .dark .token.cdata              { color: #585550; font-style: italic; }
-
-    .dark .token.punctuation        { color: #807d78; }
-
-    .dark .token.property,
-    .dark .token.tag,
-    .dark .token.boolean,
-    .dark .token.number,
-    .dark .token.constant,
-    .dark .token.attr-name          { color: #a8a5a0; }
-
-    .dark .token.string,
-    .dark .token.char,
-    .dark .token.builtin,
-    .dark .token.attr-value,
-    .dark .token.inserted           { color: #b0ada8; }
-
-    .dark .token.operator,
-    .dark .token.entity             { color: #888580; }
-
-    .dark .token.atrule,
-    .dark .token.keyword            { color: #f0ede8; font-weight: 600; }
-
-    .dark .token.function,
-    .dark .token.class-name         { color: #e0ddd8; font-weight: 500; }
-
-    .dark .token.property-access,
-    .dark .token.variable           { color: #d0cdc8; }
-
-    .dark .token.deleted,
-    .dark .token.important          { color: #a8a5a0; }
-
-    /* shared */
-    .token.important,
-    .token.bold     { font-weight: 600; }
-    .token.italic   { font-style: italic; }
-    .token.entity   { cursor: help; }
+  }
 </style>

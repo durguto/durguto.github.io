@@ -5,22 +5,21 @@
 ---
 
 <script is:inline>
-  // figure out user's preferred theme and set it as html class for tailwind before paint
   (function () {
     if (typeof window !== "undefined") {
       const isSystemColorSchemeDark = window.matchMedia(
         "(prefers-color-scheme: dark)"
       ).matches;
       const storageTheme = sessionStorage.getItem("theme");
+      const themeColor = document.head.querySelector('meta[name="theme-color"]');
       if (!storageTheme && isSystemColorSchemeDark) {
         document.documentElement.classList.add("dark");
-        document.head.children.namedItem("theme-color").content = "#262626";
+        if (themeColor) themeColor.setAttribute("content", "#111111");
       } else if (storageTheme === "dark") {
         document.documentElement.classList.add("dark");
-        document.head.children.namedItem("theme-color").content = "#262626";
+        if (themeColor) themeColor.setAttribute("content", "#111111");
       } else {
-        // we already server render light theme
-        document.head.children.namedItem("theme-color").content = "#ffffff";
+        if (themeColor) themeColor.setAttribute("content", "#ffffff");
       }
     }
   })();

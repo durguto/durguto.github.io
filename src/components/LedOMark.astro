@@ -1,0 +1,526 @@
+---
+---
+
+<div class="led-o-wrap">
+  <canvas
+    class="led-o"
+    width="41"
+    height="41"
+    role="img"
+    aria-label="O mark"
+  ></canvas>
+</div>
+
+<script>
+  // 1-indexed lit cols: 2-3-4 / 1 5 / 1 5 / 1 5 / 2-3-4
+  const O_MAP = [
+    [0, 1, 1, 1, 0],
+    [1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1],
+    [0, 1, 1, 1, 0],
+  ];
+
+  const N = 5;
+  const TOTAL = N * N;
+  const SIZE = 5;
+  const GAP = 4;
+  const STEP = SIZE + GAP;
+  const CANVAS = (N - 1) * STEP + SIZE;
+  const DIM_AFTER = 48;
+  const TOP_EPS = 8;
+
+  // one-by-one cascade
+  const STEP_MS = 55;
+  const FLIP_MS = 70;
+  const PROG_STEP_MS = 52;
+  const OFF_LEVEL = 0.05;
+
+  function hash(i: number, j: number, salt = 0) {
+    const n = Math.sin(i * 127.1 + j * 311.7 + salt * 74.7) * 43758.5453;
+    return n - Math.floor(n);
+  }
+
+  function parseRgb(color: string): [number, number, number] {
+    const hex = color.trim();
+    if (hex.startsWith("#") && hex.length === 7) {
+      return [
+        parseInt(hex.slice(1, 3), 16),
+        parseInt(hex.slice(3, 5), 16),
+        parseInt(hex.slice(5, 7), 16),
+      ];
+    }
+    const m = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    if (!m) return [17, 17, 17];
+    return [Number(m[1]), Number(m[2]), Number(m[3])];
+  }
+
+  function lerp(
+    a: [number, number, number],
+    b: [number, number, number],
+    t: number
+  ): [number, number, number] {
+    return [
+      a[0] + (b[0] - a[0]) * t,
+      a[1] + (b[1] - a[1]) * t,
+      a[2] + (b[2] - a[2]) * t,
+    ];
+  }
+
+  function clamp01(v: number) {
+    return Math.max(0, Math.min(1, v));
+  }
+
+  function init(canvas: HTMLCanvasElement) {
+    const wrap = canvas.closest(".led-o-wrap");
+    const ctx = canvas.getContext("2d");
+    if (!ctx || !wrap) return;
+
+    // Blog post sidebar mark → scroll progress meter
+    const isProgress = !!canvas.closest(".post-mark");
+
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = CANVAS * dpr;
+    canvas.height = CANVAS * dpr;
+    canvas.style.width = `${CANVAS}px`;
+    canvas.style.height = `${CANVAS}px`;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    type Led = {
+      i: number;
+      j: number;
+      x: number;
+      y: number;
+      inLogo: boolean;
+      level: number;
+      orderOn: number;
+      orderOff: number;
+      orderProg: number;
+      bias: number;
+      flickerPhase: number;
+      progLit: boolean;
+      flipStart: number;
+      flipping: boolean;
+    };
+
+    // All 25 dots — logo uses O_MAP subset; progress uses every cell
+    const leds: Led[] = [];
+    for (let j = 0; j < N; j++) {
+      for (let i = 0; i < N; i++) {
+        leds.push({
+          i,
+          j,
+          x: SIZE / 2 + i * STEP,
+          y: SIZE / 2 + j * STEP,
+          inLogo: O_MAP[j][i] === 1,
+          level: OFF_LEVEL,
+          orderOn: 0,
+          orderOff: 0,
+          // top-left → right, then next row → bottom-right
+          orderProg: j * N + i,
+          bias: 0.9 + hash(i, j, 1) * 0.12,
+          flickerPhase: hash(i, j, 2) * Math.PI * 2,
+          progLit: false,
+          flipStart: 0,
+          flipping: false,
+        });
+      }
+    }
+
+    const logoLeds = leds.filter((led) => led.inLogo);
+
+    // Logo cascade: slightly broken orders (logo cells only)
+    const byOn = [...logoLeds].sort(
+      (a, b) => hash(a.i, a.j, 10) - hash(b.i, b.j, 10)
+    );
+    const byOff = [...logoLeds].sort(
+      (a, b) => hash(a.i, a.j, 20) - hash(b.i, b.j, 20)
+    );
+    byOn.forEach((led, idx) => {
+      led.orderOn = idx;
+    });
+    byOff.forEach((led, idx) => {
+      led.orderOff = idx;
+    });
+
+    // home: dim-on-scroll
+    let dimmed = false;
+    let hover = false;
+    let wantOn = false;
+    let cascadeStart = performance.now();
+    let cascading = false;
+    let booted = false;
+
+    // blog progress: logo → extinguish → meter → blank → ignite → logo
+    type Phase = "logo" | "extinguish" | "meter" | "blank" | "ignite";
+    let phase: Phase = "logo";
+    let phaseStart = performance.now();
+    // meter chase: displayCount walks one-by-one toward targetCount
+    let targetCount = 0;
+    let displayCount = 0;
+    let nextChaseAt = 0;
+
+    function themeColors() {
+      const styles = getComputedStyle(document.documentElement);
+      const on = parseRgb(
+        styles.getPropertyValue("--led-on").trim() || "#111111"
+      );
+      const off = parseRgb(
+        styles.getPropertyValue("--led-off").trim() || "#c8c8c8"
+      );
+      return { on, off };
+    }
+
+    function startCascade(nextOn: boolean) {
+      wantOn = nextOn;
+      cascadeStart = performance.now();
+      cascading = true;
+      wrap.classList.toggle("is-dimmed", !wantOn);
+    }
+
+    function readingProgress() {
+      const max = Math.max(
+        0,
+        document.documentElement.scrollHeight - window.innerHeight
+      );
+      if (max <= 0) return 0;
+      return clamp01(window.scrollY / max);
+    }
+
+    function progressCount() {
+      return Math.round(readingProgress() * TOTAL);
+    }
+
+    function updateProgressAria() {
+      const pct = Math.round((targetCount / TOTAL) * 100);
+      canvas.setAttribute(
+        "aria-label",
+        targetCount <= 0 ? "O mark" : `Reading progress ${pct}%`
+      );
+    }
+
+    function startFlip(led: Led, toOn: boolean, now: number) {
+      led.flipping = true;
+      led.flipStart = now;
+      led.progLit = toOn;
+    }
+
+    function setMeterTarget(count: number) {
+      targetCount = Math.max(0, Math.min(TOTAL, count));
+      updateProgressAria();
+    }
+
+    function snapMeter(count: number) {
+      targetCount = displayCount = Math.max(0, Math.min(TOTAL, count));
+      nextChaseAt = 0;
+      for (const led of leds) {
+        led.progLit = led.orderProg < displayCount;
+        led.level = led.progLit ? led.bias : OFF_LEVEL;
+        led.flipping = false;
+      }
+      updateProgressAria();
+    }
+
+    // Advance one LED toward target — never spawn the whole grid at once
+    function chaseMeter(now: number) {
+      if (displayCount === targetCount) return;
+      if (now < nextChaseAt) return;
+
+      if (displayCount < targetCount) {
+        const led = leds[displayCount];
+        if (led) startFlip(led, true, now);
+        displayCount += 1;
+      } else {
+        displayCount -= 1;
+        const led = leds[displayCount];
+        if (led) startFlip(led, false, now);
+      }
+      nextChaseAt = now + PROG_STEP_MS;
+    }
+
+    function enterPhase(next: Phase, now: number) {
+      phase = next;
+      phaseStart = now;
+      if (next === "extinguish") {
+        wantOn = false;
+        cascading = true;
+        cascadeStart = now;
+        wrap.classList.add("is-dimmed");
+      } else if (next === "blank") {
+        wantOn = false;
+        cascading = false;
+        for (const led of leds) {
+          led.level = OFF_LEVEL;
+          led.progLit = false;
+          led.flipping = false;
+        }
+        targetCount = 0;
+        displayCount = 0;
+        nextChaseAt = 0;
+        canvas.setAttribute("aria-label", "O mark");
+        wrap.classList.add("is-dimmed");
+      } else if (next === "ignite") {
+        wantOn = true;
+        cascading = true;
+        cascadeStart = now;
+        wrap.classList.remove("is-dimmed");
+        for (const led of leds) {
+          led.progLit = false;
+          led.flipping = false;
+          if (!led.inLogo) led.level = OFF_LEVEL;
+        }
+      } else if (next === "meter") {
+        cascading = false;
+        wantOn = false;
+        wrap.classList.add("is-dimmed");
+        for (const led of leds) {
+          led.level = OFF_LEVEL;
+          led.progLit = false;
+          led.flipping = false;
+        }
+        // start empty, then cascade toward current progress
+        displayCount = 0;
+        setMeterTarget(progressCount());
+        nextChaseAt = now + 90;
+      } else if (next === "logo") {
+        cascading = false;
+        wantOn = true;
+        wrap.classList.remove("is-dimmed");
+        canvas.setAttribute("aria-label", "O mark");
+      }
+    }
+
+    function tick(now: number) {
+      const { on, off } = themeColors();
+      const t = now / 1000;
+      const elapsed = now - cascadeStart;
+
+      ctx.clearRect(0, 0, CANVAS, CANVAS);
+
+      let stillMoving = false;
+
+      if (isProgress && phase === "meter" && !reduced) {
+        chaseMeter(now);
+      }
+
+      for (const led of leds) {
+        if (isProgress && phase === "meter") {
+          if (led.flipping) {
+            const local = now - led.flipStart;
+            if (local < 0) {
+              stillMoving = true;
+            } else if (local < FLIP_MS) {
+              stillMoving = true;
+              const u = local / FLIP_MS;
+              if (led.progLit) {
+                const pop = u < 0.35 ? u / 0.35 : 1 - (u - 0.35) * 0.15;
+                led.level = clamp01(OFF_LEVEL + pop * (1.05 - OFF_LEVEL));
+              } else if (u < 0.25) {
+                led.level = clamp01(led.level + 0.2);
+              } else {
+                const d = (u - 0.25) / 0.75;
+                led.level = clamp01(1 - d * d) * 0.15 + OFF_LEVEL;
+              }
+            } else {
+              led.flipping = false;
+              led.level = led.progLit ? led.bias : OFF_LEVEL;
+            }
+          } else if (led.progLit) {
+            const shimmer =
+              0.03 * Math.sin(t * (2.6 + hash(led.i, led.j, 9) * 2) + led.flickerPhase);
+            led.level = clamp01(led.bias + shimmer);
+          } else {
+            led.level = OFF_LEVEL;
+          }
+        } else if (!led.inLogo) {
+          // logo / home modes: hole cells stay dim
+          led.level = OFF_LEVEL;
+        } else if (reduced) {
+          led.level = wantOn ? led.bias : OFF_LEVEL;
+        } else if (cascading) {
+          const order = wantOn ? led.orderOn : led.orderOff;
+          const jitter = (hash(led.i, led.j, 30) - 0.5) * 28;
+          const startAt = order * STEP_MS + jitter;
+          const local = elapsed - startAt;
+
+          if (local < 0) {
+            stillMoving = true;
+          } else if (local < FLIP_MS) {
+            stillMoving = true;
+            const u = local / FLIP_MS;
+            if (wantOn) {
+              const pop = u < 0.35 ? u / 0.35 : 1 - (u - 0.35) * 0.15;
+              led.level = clamp01(OFF_LEVEL + pop * (1.05 - OFF_LEVEL));
+            } else if (u < 0.25) {
+              led.level = clamp01(led.level + 0.25);
+            } else {
+              const d = (u - 0.25) / 0.75;
+              led.level = clamp01(1 - d * d) * 0.15 + OFF_LEVEL;
+            }
+          } else {
+            led.level = wantOn ? led.bias : OFF_LEVEL;
+          }
+        } else if (wantOn) {
+          const shimmer =
+            0.035 * Math.sin(t * (2.8 + hash(led.i, led.j, 9) * 2.2) + led.flickerPhase);
+          led.level = clamp01(led.bias + shimmer);
+        } else {
+          led.level = OFF_LEVEL;
+        }
+
+        const curved = Math.pow(clamp01(led.level), 0.7);
+        const [r, g, b] = lerp(off, on, curved);
+        ctx.beginPath();
+        ctx.arc(led.x, led.y, SIZE / 2, 0, Math.PI * 2);
+        ctx.fillStyle = `rgb(${r | 0}, ${g | 0}, ${b | 0})`;
+        ctx.fill();
+      }
+
+      const cascadeSpan = logoLeds.length * STEP_MS + FLIP_MS + 40;
+      if (cascading && !stillMoving && elapsed > cascadeSpan) {
+        cascading = false;
+        if (isProgress) {
+          if (phase === "extinguish") enterPhase("meter", now);
+          else if (phase === "ignite") enterPhase("logo", now);
+        }
+      }
+
+      if (isProgress && phase === "blank" && now - phaseStart > 160) {
+        enterPhase("ignite", now);
+      }
+
+      requestAnimationFrame(tick);
+    }
+
+    function setDimmed(next: boolean) {
+      if (!booted) return;
+      if (next === dimmed) return;
+      dimmed = next;
+      const nextOn = !dimmed || hover;
+      if (nextOn !== wantOn) startCascade(nextOn);
+    }
+
+    function onScrollHome() {
+      setDimmed(window.scrollY > DIM_AFTER);
+    }
+
+    function onScrollProgress() {
+      if (!booted) return;
+      const atTop = window.scrollY <= TOP_EPS;
+      const now = performance.now();
+
+      if (atTop) {
+        if (phase === "meter" || phase === "extinguish") {
+          enterPhase("blank", now);
+        }
+        return;
+      }
+
+      if (phase === "logo" || phase === "ignite") {
+        enterPhase("extinguish", now);
+        return;
+      }
+
+      if (phase === "blank") {
+        enterPhase("extinguish", now);
+        return;
+      }
+
+      if (phase === "meter") {
+        setMeterTarget(progressCount());
+      }
+    }
+
+    if (isProgress) {
+      window.addEventListener("scroll", onScrollProgress, { passive: true });
+    } else {
+      wrap.addEventListener("mouseenter", () => {
+        hover = true;
+        if (!wantOn) startCascade(true);
+      });
+      wrap.addEventListener("mouseleave", () => {
+        hover = false;
+        if (dimmed && wantOn) startCascade(false);
+      });
+      window.addEventListener("scroll", onScrollHome, { passive: true });
+    }
+
+    if (reduced) {
+      if (isProgress) {
+        const atTop = window.scrollY <= TOP_EPS;
+        if (atTop) {
+          wantOn = true;
+          for (const led of leds) led.level = led.inLogo ? led.bias : OFF_LEVEL;
+          phase = "logo";
+          wrap.classList.remove("is-dimmed");
+        } else {
+          wantOn = false;
+          phase = "meter";
+          wrap.classList.add("is-dimmed");
+          snapMeter(progressCount());
+        }
+      } else {
+        dimmed = window.scrollY > DIM_AFTER;
+        wantOn = !dimmed;
+        for (const led of leds) {
+          led.level = wantOn && led.inLogo ? led.bias : OFF_LEVEL;
+        }
+        wrap.classList.toggle("is-dimmed", !wantOn);
+      }
+      booted = true;
+    } else {
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          if (isProgress) {
+            if (window.scrollY <= TOP_EPS) {
+              enterPhase("ignite", performance.now());
+            } else {
+              enterPhase("meter", performance.now());
+            }
+          } else {
+            dimmed = window.scrollY > DIM_AFTER;
+            if (!dimmed) startCascade(true);
+            else {
+              wantOn = false;
+              wrap.classList.add("is-dimmed");
+            }
+          }
+          booted = true;
+        }, 120);
+      });
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  document.querySelectorAll<HTMLCanvasElement>("canvas.led-o").forEach(init);
+</script>
+
+<style>
+  .led-o-wrap {
+    display: flex;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .led-o {
+    display: block;
+    width: 41px;
+    height: 41px;
+  }
+
+  :global(.post-mark) .led-o-wrap {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 540px) {
+    .led-o-wrap {
+      margin-bottom: 12px;
+    }
+
+    :global(.post-mark) .led-o-wrap {
+      margin-bottom: 0;
+    }
+  }
+</style>

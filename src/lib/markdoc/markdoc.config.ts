@@ -140,9 +140,14 @@ export const config: Config = {
             }:${node.location?.start.line ?? "(unknown line)"}`
           );
         }
+        const content = children.join("");
+        const lang = String(attributes.language ?? "").toLowerCase();
+        if (lang === "diagram" || lang === "arch") {
+          return new Tag("ArchDiagram", { content }, []);
+        }
         return new Tag(
           this.render,
-          { ...attributes, content: children.join("") },
+          { ...attributes, content },
           []
         );
       },

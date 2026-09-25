@@ -10,7 +10,6 @@ interface Props extends HTMLAttributes<'h1'> {
 const { level, children } = Astro.props;
 const headingText = children.length && typeof children[0] === 'string' ? children[0] : '';
 const id = slugify(headingText.toLowerCase());
-const prefix = '#'.repeat(level);
 
 let Tag: HTMLTag = "h1";
 if (level === 2) Tag = "h2";
@@ -19,7 +18,18 @@ else if (level === 4) Tag = "h4";
 else if (level === 5) Tag = "h5";
 else if (level === 6) Tag = "h6";
 ---
-<Tag id={id} class="flex items-baseline gap-[0.5em]">
-    <span class="not-prose text-text-muted select-none shrink-0" aria-hidden="true">{prefix}</span>
-    <a href={`#${id}`} class="unset">{children}</a>
+<Tag id={id}>
+  <a href={`#${id}`} class="heading-anchor unset">{children}</a>
 </Tag>
+
+<style>
+  .heading-anchor {
+    color: inherit !important;
+    text-decoration: none !important;
+    font-weight: inherit !important;
+  }
+
+  .heading-anchor:hover {
+    text-decoration: none !important;
+  }
+</style>

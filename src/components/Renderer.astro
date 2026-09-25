@@ -6,6 +6,7 @@ import TweetEmbed from "./TweetEmbed.astro";
 import CodePenEmbed from "./CodePenEmbed.astro";
 import GitHubGistEmbed from "./GitHubGistEmbed.astro";
 import CodeBlock from "./CodeBlock.astro";
+import ArchDiagram from "./ArchDiagram.astro";
 import Heading from "./Heading.astro";
 
 type Props = {
@@ -21,6 +22,10 @@ const components = {
   },
   CodeBlock: {
     Component: CodeBlock,
+    props: {},
+  },
+  ArchDiagram: {
+    Component: ArchDiagram,
     props: {},
   },
   YouTubeEmbed: {

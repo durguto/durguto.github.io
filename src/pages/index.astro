@@ -4,6 +4,7 @@ import { blog } from "../lib/markdoc/frontmatter.schema";
 import PageMeta from "../components/PageMeta.astro";
 import PageLayout from "../layouts/PageLayout.astro";
 import Intro from "../components/Intro.astro";
+import SineDivider from "../components/SineDivider.astro";
 import { SITE_TITLE } from "../config";
 
 const posts = await readAll({
@@ -19,78 +20,112 @@ const sortedPosts = posts
       new Date(a.frontmatter.date).valueOf()
   );
 
-const postsByYear = sortedPosts.reduce((acc, post) => {
-  const year = new Date(post.frontmatter.date).getFullYear();
-  if (!acc[year]) acc[year] = [];
-  acc[year].push(post);
-  return acc;
-}, {} as Record<number, typeof sortedPosts>);
+const postsByYear = sortedPosts.reduce(
+  (acc, post) => {
+    const year = post.frontmatter.date.getUTCFullYear();
+    if (!acc[year]) acc[year] = [];
+    acc[year].push(post);
+    return acc;
+  },
+  {} as Record<number, typeof sortedPosts>
+);
 
-const years = Object.keys(postsByYear).map(Number).sort((a, b) => b - a);
+const years = Object.keys(postsByYear)
+  .map(Number)
+  .sort((a, b) => b - a);
 ---
 
-<PageLayout heroMobile>
+<PageLayout current="home">
   <PageMeta title={`${SITE_TITLE}`} slot="meta" />
   <Fragment slot="main">
     <Intro />
 
-    <section class="pb-12">
-      {years.map((year) => {
-        const yearPosts = postsByYear[year];
-        return (
-          <div class="mb-8">
-            <p class="text-base text-text-muted mb-2 select-none">// {year}</p>
-            {yearPosts.map((post, i) => {
-              const isLast = i === yearPosts.length - 1;
-              const prefix = isLast ? "└─" : "├─";
+    {
+      years.map((year, yearIndex) => (
+        <section class={yearIndex === 0 ? "year-section gap-lg" : "year-section"}>
+          <div class="year-head">
+            <span class="year-label">{year}</span>
+            <SineDivider class="year-wave" />
+          </div>
+          <div class="post-list">
+            {postsByYear[year].map((post) => {
               const d = post.frontmatter.date;
-              const formattedDate = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+              const formattedDate = `${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
               return (
-                <div class="flex items-baseline gap-1.5 py-[0.3rem]">
-                  <span class="text-text-muted text-base shrink-0 select-none">{prefix}</span>
+                <div class="post-row">
                   {post.frontmatter.external ? (
                     <a
                       href={post.frontmatter.url}
                       target="_blank"
-                      class="unset text-text-heading text-base font-medium hover:opacity-60 transition-opacity duration-150 shrink-0"
-                    >
-                      {post.frontmatter.title}<span class="ext-icon">↗</span>
-                    </a>
-                  ) : (
-                    <a
-                      href={`/blog/${post.slug}`}
-                      class="unset text-text-heading text-base font-medium hover:opacity-60 transition-opacity duration-150 shrink-0"
+                      rel="noreferrer"
+                      class="ext"
                     >
                       {post.frontmatter.title}
+                      <svg
+                        aria-hidden="true"
+                        fill="none"
+                        height="12"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                        width="12"
+                      >
+                        <path d="M7 7h10v10" />
+                        <path d="M7 17 17 7" />
+                      </svg>
                     </a>
+                  ) : (
+                    <a href={`/blog/${post.slug}`}>{post.frontmatter.title}</a>
                   )}
-                  <span class="dot-leader flex-1 min-w-2"></span>
-                  <time
-                    datetime={post.frontmatter.date.toISOString()}
-                    class="text-base text-text-muted tabular-nums shrink-0 select-none"
-                  >
+                  <time datetime={post.frontmatter.date.toISOString()}>
                     {formattedDate}
                   </time>
                 </div>
               );
             })}
           </div>
-        );
-      })}
-    </section>
+        </section>
+      ))
+    }
   </Fragment>
 </PageLayout>
 
 <style>
-  .dot-leader {
-    border-bottom: 1px dotted rgb(var(--color-border-subtle));
-    margin-bottom: 4px;
+  .year-section {
+    margin-top: 48px;
   }
 
-  .ext-icon {
-    font-size: 0.7em;
-    color: rgb(var(--color-text-muted));
-    margin-left: 0.3em;
-    vertical-align: 0.15em;
+  .year-section.gap-lg {
+    margin-top: calc(3.5 * var(--page-paragraph));
+  }
+
+  .year-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+
+  .year-label {
+    flex-shrink: 0;
+    margin: 0;
+    color: var(--text);
+    font-size: 1em;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: inherit;
+  }
+
+  .year-wave {
+    flex: 1;
+    min-width: 0;
+    height: 10px;
+  }
+
+  .year-section .post-list {
+    margin-top: 0;
+    gap: 11px;
   }
 </style>

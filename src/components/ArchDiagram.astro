@@ -1,0 +1,564 @@
+---
+/**
+ * Clusdr architecture
+ * Application stays on the solid daemon. A dashed ghost of the daemon
+ * rises, becomes a cube, flies to the cluster, and seats.
+ */
+interface Props {
+  /** Fence body from markdoc; structure is fixed for this diagram. */
+  content: string;
+}
+
+const { content: _content } = Astro.props;
+
+const COS = Math.cos(Math.PI / 6);
+const SIN = Math.sin(Math.PI / 6);
+
+function iso(x: number, y: number, z: number) {
+  return { x: (x - y) * COS, y: (x + y) * SIN - z };
+}
+
+function poly(corners: [number, number, number][]) {
+  return corners
+    .map(([x, y, z]) => {
+      const p = iso(x, y, z);
+      return `${p.x.toFixed(2)},${p.y.toFixed(2)}`;
+    })
+    .join(" ");
+}
+
+type Box = { x: number; y: number; w: number; d: number; z: number; h: number };
+
+function facesOf(b: Box) {
+  const { x, y, w, d, z, h } = b;
+  return {
+    top: poly([
+      [x, y, z + h],
+      [x + w, y, z + h],
+      [x + w, y + d, z + h],
+      [x, y + d, z + h],
+    ]),
+    south: poly([
+      [x, y + d, z + h],
+      [x + w, y + d, z + h],
+      [x + w, y + d, z],
+      [x, y + d, z],
+    ]),
+    east: poly([
+      [x + w, y, z + h],
+      [x + w, y + d, z + h],
+      [x + w, y + d, z],
+      [x + w, y, z],
+    ]),
+  };
+}
+
+/**
+ * Affine that maps local (u,v) on a top face into screen space —
+ * same projection as the box tops (not a flat rotate).
+ * Local +u → world +x, +v → world +y.
+ */
+function topFaceMark(b: Box, lip = 0.5) {
+  const wx = b.x + b.w / 2;
+  const wy = b.y + b.d * lip;
+  const wz = b.z + b.h + 0.2;
+  const o = iso(wx, wy, wz);
+  // x' = COS*u - COS*v + ox
+  // y' = SIN*u + SIN*v + oy
+  const matrix = `${COS.toFixed(5)},${SIN.toFixed(5)},${(-COS).toFixed(5)},${SIN.toFixed(5)},${o.x.toFixed(2)},${o.y.toFixed(2)}`;
+  return { matrix };
+}
+
+function box(b: Box) {
+  return facesOf(b);
+}
+
+/* —— metrics —— */
+const CUBE = 15;
+const CUBE_H = 10;
+const GAP = 2.25;
+const MARGIN = 9;
+
+const PW = 3 * CUBE + 2 * GAP + MARGIN * 2;
+const PD = PW;
+const PH = 6;
+const GHOST_RISE = 22;
+
+const APP_IN = 16; /* smaller app → room for "daemon" on the rim */
+const APP_H = 5;
+
+const HOST = { x: 0, y: 0 };
+const CLUSTER = { x: PW + 14, y: -(PW + 14) };
+
+const daemonSlab: Box = { x: HOST.x, y: HOST.y, w: PW, d: PD, z: 0, h: PH };
+const ghostCubeAtHost: Box = {
+  x: HOST.x + (PW - CUBE) / 2,
+  y: HOST.y + (PD - CUBE) / 2,
+  w: CUBE,
+  d: CUBE,
+  z: GHOST_RISE,
+  h: CUBE_H,
+};
+const ghostSlabRisen: Box = { ...daemonSlab, z: GHOST_RISE };
+
+const appSlab: Box = {
+  x: HOST.x + APP_IN,
+  y: HOST.y + APP_IN,
+  w: PW - APP_IN * 2,
+  d: PD - APP_IN * 2,
+  z: PH,
+  h: APP_H,
+};
+
+const clusterPad: Box = { x: CLUSTER.x, y: CLUSTER.y, w: PW, d: PD, z: 0, h: PH };
+
+const rowW = 3 * CUBE + 2 * GAP;
+const seatY = CLUSTER.y + (PD - CUBE) / 2;
+const seatX0 = CLUSTER.x + (PW - rowW) / 2;
+
+const seats = [0, 1, 2].map((i) => {
+  const b: Box = {
+    x: seatX0 + i * (CUBE + GAP),
+    y: seatY,
+    w: CUBE,
+    d: CUBE,
+    z: PH,
+    h: CUBE_H,
+  };
+  return { i, self: i === 1, box: b, faces: box(b) };
+});
+const seatBox = seats[1].box;
+
+const pathA = iso(HOST.x + PW / 2, HOST.y + PD / 2, GHOST_RISE + CUBE_H / 2);
+const pathB = iso(seatBox.x + CUBE / 2, seatBox.y + CUBE / 2, PH + CUBE_H / 2);
+const pathC = {
+  x: (pathA.x + pathB.x) / 2,
+  y: (pathA.y + pathB.y) / 2 - 6,
+};
+
+const daemonF = box(daemonSlab);
+const appF = box(appSlab);
+const clusterF = box(clusterPad);
+const ghostF = box(daemonSlab);
+
+/* On-top labels via true iso top-face affine */
+const appMark = topFaceMark(appSlab, 0.5);
+const daemonMark = topFaceMark(daemonSlab, 0.92);
+const clusterMark = topFaceMark(clusterPad, 0.9);
+
+const hostShadow = iso(HOST.x + PW / 2, HOST.y + PD / 2, 0);
+const clusterShadow = iso(CLUSTER.x + PW / 2, CLUSTER.y + PD / 2, 0);
+
+const id = "d";
+
+/** Every corner of a box → screen points (fixes viewBox clipping) */
+function boxCorners(b: Box) {
+  const { x, y, w, d, z, h } = b;
+  return [
+    [x, y, z],
+    [x + w, y, z],
+    [x + w, y + d, z],
+    [x, y + d, z],
+    [x, y, z + h],
+    [x + w, y, z + h],
+    [x + w, y + d, z + h],
+    [x, y + d, z + h],
+  ].map(([wx, wy, wz]) => iso(wx, wy, wz));
+}
+
+const extents = [
+  ...boxCorners(daemonSlab),
+  ...boxCorners(appSlab),
+  ...boxCorners(ghostSlabRisen),
+  ...boxCorners(ghostCubeAtHost),
+  ...boxCorners(clusterPad),
+  ...seats.flatMap((s) => boxCorners(s.box)),
+  pathA,
+  pathB,
+  pathC,
+];
+let minX = Infinity,
+  maxX = -Infinity,
+  minY = Infinity,
+  maxY = -Infinity;
+for (const p of extents) {
+  minX = Math.min(minX, p.x);
+  maxX = Math.max(maxX, p.x);
+  minY = Math.min(minY, p.y);
+  maxY = Math.max(maxY, p.y);
+}
+const pad = 8;
+const vb = `${(minX - pad).toFixed(1)} ${(minY - pad).toFixed(1)} ${(maxX - minX + pad * 2).toFixed(1)} ${(maxY - minY + pad * 2).toFixed(1)}`;
+
+const morphPayload = JSON.stringify({
+  daemonSlab,
+  ghostSlabRisen,
+  ghostCubeAtHost,
+  seat: seatBox,
+  path: { a: pathA, b: pathB, c: pathC },
+});
+---
+
+<figure class="arch" data-arch data-morph={morphPayload}>
+  <svg class="arch-svg" viewBox={vb} preserveAspectRatio="xMidYMid meet" role="img" aria-label="clusdr daemon joins cluster">
+    <defs>
+      <linearGradient id={`${id}-top`} x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="var(--top-a)"></stop>
+        <stop offset="100%" stop-color="var(--top-b)"></stop>
+      </linearGradient>
+      <linearGradient id={`${id}-south`} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--south-a)"></stop>
+        <stop offset="100%" stop-color="var(--south-b)"></stop>
+      </linearGradient>
+      <linearGradient id={`${id}-east`} x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="var(--east-a)"></stop>
+        <stop offset="100%" stop-color="var(--east-b)"></stop>
+      </linearGradient>
+      <linearGradient id={`${id}-lit`} x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="var(--lit-a)"></stop>
+        <stop offset="100%" stop-color="var(--lit-b)"></stop>
+      </linearGradient>
+      <filter id={`${id}-blur`} x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="3"></feGaussianBlur>
+      </filter>
+    </defs>
+
+    <ellipse class="shadow" cx={hostShadow.x} cy={hostShadow.y + 3.5} rx="18" ry="5" filter={`url(#${id}-blur)`}></ellipse>
+    <ellipse class="shadow" cx={clusterShadow.x} cy={clusterShadow.y + 3.5} rx="18" ry="5" filter={`url(#${id}-blur)`}></ellipse>
+
+    <!-- Solid host: daemon + Application (never leave) -->
+    <g data-host>
+      <polygon class="face south" points={daemonF.south} fill={`url(#${id}-south)`}></polygon>
+      <polygon class="face east" points={daemonF.east} fill={`url(#${id}-east)`}></polygon>
+      <polygon class="face top" points={daemonF.top} fill={`url(#${id}-top)`}></polygon>
+      <polygon class="face south" points={appF.south} fill={`url(#${id}-south)`}></polygon>
+      <polygon class="face east" points={appF.east} fill={`url(#${id}-east)`}></polygon>
+      <polygon class="face top" points={appF.top} fill={`url(#${id}-top)`}></polygon>
+    </g>
+
+    <!-- Cluster -->
+    <g data-cluster>
+      <polygon class="face south" points={clusterF.south} fill={`url(#${id}-south)`}></polygon>
+      <polygon class="face east" points={clusterF.east} fill={`url(#${id}-east)`}></polygon>
+      <polygon class="face top" points={clusterF.top} fill={`url(#${id}-top)`}></polygon>
+      {
+        seats.map((s) => (
+          <g data-seat={s.self ? "1" : undefined}>
+            <polygon class="face south" points={s.faces.south} fill={`url(#${id}-south)`}></polygon>
+            <polygon class="face east" points={s.faces.east} fill={`url(#${id}-east)`}></polygon>
+            <polygon
+              class:list={["face", "top", s.self && "lit"]}
+              points={s.faces.top}
+              fill={s.self ? `url(#${id}-lit)` : `url(#${id}-top)`}
+            ></polygon>
+          </g>
+        ))
+      }
+    </g>
+
+    <!-- Dashed ghost of the daemon — rises, cubes, joins cluster -->
+    <g class="ghost" data-ghost opacity="0">
+      <polygon class="gface" data-g-south points={ghostF.south}></polygon>
+      <polygon class="gface" data-g-east points={ghostF.east}></polygon>
+      <polygon class="gface" data-g-top points={ghostF.top}></polygon>
+    </g>
+
+    <!-- Quiet labels lying on each top face (true iso affine) -->
+    <g class="mark" transform={`matrix(${daemonMark.matrix})`}>
+      <text text-anchor="middle" dominant-baseline="central" font-size="8">daemon</text>
+    </g>
+    <g class="mark" transform={`matrix(${appMark.matrix})`}>
+      <text text-anchor="middle" dominant-baseline="central" font-size="7.5">app</text>
+    </g>
+    <g class="mark" transform={`matrix(${clusterMark.matrix})`}>
+      <text text-anchor="middle" dominant-baseline="central" font-size="8">Cluster</text>
+    </g>
+  </svg>
+</figure>
+
+<style>
+  .arch {
+    --top-a: #fafafa;
+    --top-b: #f0f0f0;
+    --south-a: #e6e6e6;
+    --south-b: #d4d4d4;
+    --east-a: #cecece;
+    --east-b: #bcbcbc;
+    --lit-a: #eef4ff;
+    --lit-b: #d7e4ff;
+
+    width: 100%;
+    max-width: 100%;
+    margin: calc(var(--page-paragraph) * 1.05) 0 calc(var(--page-paragraph) * 0.35);
+    overflow: hidden;
+  }
+
+  :global(html.dark) .arch {
+    --top-a: #2b2b2b;
+    --top-b: #212121;
+    --south-a: #181818;
+    --south-b: #111;
+    --east-a: #141414;
+    --east-b: #0d0d0d;
+    --lit-a: #293648;
+    --lit-b: #1d2a38;
+  }
+
+  .arch-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: hidden;
+  }
+
+  .shadow {
+    fill: rgb(0 0 0 / 0.08);
+  }
+
+  :global(html.dark) .shadow {
+    fill: rgb(0 0 0 / 0.4);
+  }
+
+  .face {
+    stroke: color-mix(in srgb, var(--border) 88%, var(--text) 5%);
+    stroke-width: 0.55;
+    stroke-linejoin: round;
+  }
+
+  .face.lit {
+    stroke: color-mix(in srgb, var(--link) 40%, var(--border));
+  }
+
+  .gface {
+    fill: none;
+    stroke: color-mix(in srgb, var(--muted) 80%, var(--link) 20%);
+    stroke-width: 1.1;
+    stroke-linejoin: round;
+    stroke-dasharray: 2.4 2.2;
+  }
+
+  .ghost.is-hot .gface {
+    stroke: color-mix(in srgb, var(--link) 70%, var(--muted));
+  }
+
+  .mark text {
+    fill: var(--muted);
+    font-family: var(--font-mono);
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    opacity: 0.8;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>("[data-arch]").forEach((root) => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const data = JSON.parse(root.dataset.morph || "{}");
+
+    const ghost = root.querySelector<SVGGElement>("[data-ghost]");
+    const gTop = root.querySelector<SVGPolygonElement>("[data-g-top]");
+    const gSouth = root.querySelector<SVGPolygonElement>("[data-g-south]");
+    const gEast = root.querySelector<SVGPolygonElement>("[data-g-east]");
+    const seat = root.querySelector<SVGGElement>("[data-seat]");
+
+    if (!ghost || !gTop || !gSouth || !gEast || !seat) return;
+
+    const COS = Math.cos(Math.PI / 6);
+    const SIN = Math.sin(Math.PI / 6);
+
+    type Box = { x: number; y: number; w: number; d: number; z: number; h: number };
+
+    function iso(x: number, y: number, z: number) {
+      return { x: (x - y) * COS, y: (x + y) * SIN - z };
+    }
+
+    function poly(corners: [number, number, number][]) {
+      return corners
+        .map(([x, y, z]) => {
+          const p = iso(x, y, z);
+          return `${p.x.toFixed(2)},${p.y.toFixed(2)}`;
+        })
+        .join(" ");
+    }
+
+    function faces(b: Box) {
+      const { x, y, w, d, z, h } = b;
+      return {
+        top: poly([
+          [x, y, z + h],
+          [x + w, y, z + h],
+          [x + w, y + d, z + h],
+          [x, y + d, z + h],
+        ]),
+        south: poly([
+          [x, y + d, z + h],
+          [x + w, y + d, z + h],
+          [x + w, y + d, z],
+          [x, y + d, z],
+        ]),
+        east: poly([
+          [x + w, y, z + h],
+          [x + w, y + d, z + h],
+          [x + w, y + d, z],
+          [x + w, y, z],
+        ]),
+        center: iso(x + w / 2, y + d / 2, z + h / 2),
+      };
+    }
+
+    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
+    function lerpBox(a: Box, b: Box, t: number): Box {
+      return {
+        x: lerp(a.x, b.x, t),
+        y: lerp(a.y, b.y, t),
+        w: lerp(a.w, b.w, t),
+        d: lerp(a.d, b.d, t),
+        z: lerp(a.z, b.z, t),
+        h: lerp(a.h, b.h, t),
+      };
+    }
+
+    function drawGhost(b: Box, opacity: number) {
+      const f = faces(b);
+      gTop.setAttribute("points", f.top);
+      gSouth.setAttribute("points", f.south);
+      gEast.setAttribute("points", f.east);
+      ghost.setAttribute("opacity", String(opacity));
+    }
+
+    function atScreen(base: Box, sx: number, sy: number): Box {
+      const c = faces(base).center;
+      const dX = sx - c.x;
+      const dY = sy - c.y;
+      const wx = dX / (2 * COS) + dY / (2 * SIN);
+      const wy = dY / (2 * SIN) - dX / (2 * COS);
+      return { ...base, x: base.x + wx, y: base.y + wy };
+    }
+
+    function bezier(
+      t: number,
+      p0: { x: number; y: number },
+      p1: { x: number; y: number },
+      p2: { x: number; y: number }
+    ) {
+      const u = 1 - t;
+      return {
+        x: u * u * p0.x + 2 * u * t * p1.x + t * t * p2.x,
+        y: u * u * p0.y + 2 * u * t * p1.y + t * t * p2.y,
+      };
+    }
+
+    const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
+    const easeInOut = (t: number) =>
+      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+    let gen = 0;
+
+    function animate(ms: number, easeFn: (t: number) => number, frame: (t: number) => void) {
+      const my = gen;
+      return new Promise<void>((resolve) => {
+        const t0 = performance.now();
+        const step = (now: number) => {
+          if (my !== gen) return resolve();
+          const t = Math.min(1, (now - t0) / ms);
+          frame(easeFn(t));
+          if (t < 1) requestAnimationFrame(step);
+          else resolve();
+        };
+        requestAnimationFrame(step);
+      });
+    }
+
+    function wait(ms: number) {
+      const my = gen;
+      return new Promise<void>((r) =>
+        setTimeout(() => {
+          if (my === gen) r();
+        }, ms)
+      );
+    }
+
+    const daemonSlab = data.daemonSlab as Box;
+    const ghostSlabRisen = data.ghostSlabRisen as Box;
+    const ghostCubeAtHost = data.ghostCubeAtHost as Box;
+    const seatBox = data.seat as Box;
+    const path = data.path as {
+      a: { x: number; y: number };
+      b: { x: number; y: number };
+      c: { x: number; y: number };
+    };
+
+    function setSeat(o: number) {
+      seat.setAttribute("opacity", String(o));
+    }
+
+    if (reduced) {
+      drawGhost(daemonSlab, 0);
+      setSeat(1);
+      return;
+    }
+
+    async function loop() {
+      const my = ++gen;
+
+      drawGhost(daemonSlab, 0);
+      setSeat(1);
+      ghost.classList.remove("is-hot");
+      await wait(1600);
+      if (my !== gen) return;
+
+      // Vacate middle seat — ghost will fill it
+      await animate(350, easeInOut, (t) => setSeat(lerp(1, 0.12, t)));
+      if (my !== gen) return;
+
+      // Ghost appears as dashed copy of daemon, rises up
+      ghost.classList.add("is-hot");
+      await animate(700, easeOut, (t) => {
+        drawGhost(lerpBox(daemonSlab, ghostSlabRisen, t), Math.min(1, t * 1.4));
+      });
+      if (my !== gen) return;
+
+      // Still dashed: morph risen slab → cube
+      await animate(650, easeInOut, (t) => {
+        drawGhost(lerpBox(ghostSlabRisen, ghostCubeAtHost, t), 1);
+      });
+      if (my !== gen) return;
+      await wait(120);
+      if (my !== gen) return;
+
+      // Fly into the cluster seat
+      const start = faces(ghostCubeAtHost).center;
+      const end = faces(seatBox).center;
+
+      await animate(1200, easeInOut, (t) => {
+        let p: { x: number; y: number };
+        if (t < 0.12) {
+          const u = t / 0.12;
+          p = { x: lerp(start.x, path.a.x, u), y: lerp(start.y, path.a.y, u) };
+        } else if (t < 0.88) {
+          const u = (t - 0.12) / 0.76;
+          p = bezier(u, path.a, path.c, path.b);
+        } else {
+          const u = (t - 0.88) / 0.12;
+          p = { x: lerp(path.b.x, end.x, u), y: lerp(path.b.y, end.y, u) };
+        }
+
+        const settling = t > 0.88;
+        const u = settling ? (t - 0.88) / 0.12 : 0;
+        drawGhost(atScreen(ghostCubeAtHost, p.x, p.y), settling ? 1 - u : 1);
+        if (settling) setSeat(lerp(0.12, 1, u));
+      });
+      if (my !== gen) return;
+
+      drawGhost(daemonSlab, 0);
+      setSeat(1);
+      ghost.classList.remove("is-hot");
+      await wait(2000);
+      if (my !== gen) return;
+      loop();
+    }
+
+    loop();
+  });
+</script>
