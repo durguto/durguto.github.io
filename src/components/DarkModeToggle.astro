@@ -32,7 +32,14 @@
 </button>
 
 <script>
-  function updateHTMLTheme(mode: "light" | "dark") {
+  type Mode = "light" | "dark";
+
+  type ViewTransition = {
+    ready: Promise<void>;
+    finished: Promise<void>;
+  };
+
+  function updateHTMLTheme(mode: Mode) {
     const themeColorMetaTag = document.head.querySelector(
       'meta[name="theme-color"]'
     );
@@ -57,20 +64,142 @@
     }
   }
 
-  function updateStorageTheme(mode: "light" | "dark") {
+  function updateStorageTheme(mode: Mode) {
     sessionStorage.setItem("theme", mode);
   }
 
+  function prefersReducedMotion() {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+
+  function startViewTransition(update: () => void): ViewTransition | null {
+    const doc = document as Document & {
+      startViewTransition?: (cb: () => void) => ViewTransition;
+    };
+    if (typeof doc.startViewTransition !== "function") return null;
+    return doc.startViewTransition(update);
+  }
+
+  function wait(ms: number) {
+    return new Promise<void>((r) => setTimeout(r, ms));
+  }
+
+  async function blurMorph(next: Mode) {
+    const root = document.documentElement;
+    const transition = startViewTransition(() => {
+      updateHTMLTheme(next);
+      updateStorageTheme(next);
+    });
+
+    if (!transition) {
+      updateHTMLTheme(next);
+      updateStorageTheme(next);
+      return;
+    }
+
+    try {
+      await transition.ready;
+
+      const duration = 480;
+      const easing = "cubic-bezier(0.33, 1, 0.68, 1)";
+
+      const incoming = root.animate(
+        [
+          { filter: "blur(16px)", opacity: 0.4 },
+          { filter: "blur(0px)", opacity: 1 },
+        ],
+        {
+          duration,
+          easing,
+          pseudoElement: "::view-transition-new(root)",
+        }
+      );
+
+      const outgoing = root.animate(
+        [
+          { filter: "blur(0px)", opacity: 1 },
+          { filter: "blur(16px)", opacity: 0 },
+        ],
+        {
+          duration,
+          easing,
+          pseudoElement: "::view-transition-old(root)",
+        }
+      );
+
+      await Promise.race([
+        Promise.all([
+          incoming.finished.catch(() => undefined),
+          outgoing.finished.catch(() => undefined),
+        ]),
+        transition.finished.catch(() => undefined),
+        wait(duration + 140),
+      ]);
+    } catch {
+      /* theme already applied */
+    }
+  }
+
   const toggle = document.getElementById("mode-toggle");
-  let currentMode: "light" | "dark" =
-    document.documentElement.classList.contains("dark") ? "dark" : "light";
+  let busy = false;
 
-  updateHTMLTheme(currentMode);
+  updateHTMLTheme(
+    document.documentElement.classList.contains("dark") ? "dark" : "light"
+  );
 
-  toggle?.addEventListener("click", () => {
-    const next: "light" | "dark" = currentMode === "dark" ? "light" : "dark";
-    updateHTMLTheme(next);
-    updateStorageTheme(next);
-    currentMode = next;
-  });
+  if (toggle) {
+    toggle.onclick = () => {
+      if (busy) return;
+
+      const current: Mode = document.documentElement.classList.contains("dark")
+        ? "dark"
+        : "light";
+      const next: Mode = current === "dark" ? "light" : "dark";
+
+      busy = true;
+      const safety = window.setTimeout(() => {
+        busy = false;
+      }, 1000);
+
+      const run = prefersReducedMotion()
+        ? Promise.resolve().then(() => {
+            updateHTMLTheme(next);
+            updateStorageTheme(next);
+          })
+        : blurMorph(next);
+
+      run.finally(() => {
+        window.clearTimeout(safety);
+        busy = false;
+      });
+    };
+  }
 </script>
+
+<style is:global>
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+
+  ::view-transition-group(root) {
+    animation: none;
+  }
+
+  ::view-transition-old(root) {
+    z-index: 1;
+  }
+
+  ::view-transition-new(root) {
+    z-index: 2;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+      animation: none !important;
+    }
+  }
+</style>
