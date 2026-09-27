@@ -96,9 +96,15 @@
         box-sizing: border-box;
     }
 
+    html {
+        background: var(--background);
+        /* fill iOS letterbox / safe areas under the browser chrome */
+        min-height: 100%;
+        min-height: 100dvh;
+    }
+
     html,
     body {
-        min-height: 100%;
         margin: 0;
         background: var(--background);
         color: var(--text);
@@ -109,6 +115,11 @@
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         scroll-behavior: smooth;
+    }
+
+    body {
+        min-height: 100%;
+        min-height: 100dvh;
     }
 
     ::selection {
@@ -251,7 +262,7 @@
         flex-wrap: wrap;
         align-items: center;
         gap: 14px;
-        margin-bottom: 48px;
+        margin-bottom: 22px;
         font-size: var(--page-font-size);
         line-height: var(--page-line-height);
         letter-spacing: var(--page-letter-spacing);
@@ -528,7 +539,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        height: 180px;
+        height: calc(180px + env(safe-area-inset-bottom, 0px));
         pointer-events: none;
         z-index: 1;
     }
@@ -640,8 +651,8 @@
 
     .theme-toggle {
         position: fixed;
-        bottom: 16px;
-        right: 24px;
+        bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+        right: calc(24px + env(safe-area-inset-right, 0px));
         z-index: 2;
         display: grid;
         place-items: center;
@@ -689,6 +700,10 @@
     @media (max-width: 540px) {
         .app-shell {
             padding: 72px 28px;
+            padding-top: calc(72px + env(safe-area-inset-top, 0px));
+            padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+            padding-left: calc(28px + env(safe-area-inset-left, 0px));
+            padding-right: calc(28px + env(safe-area-inset-right, 0px));
         }
 
         .post-shell {
@@ -710,11 +725,11 @@
         }
 
         .app-footer {
-            left: 28px;
+            left: calc(28px + env(safe-area-inset-left, 0px));
         }
 
         .theme-toggle {
-            right: 28px;
+            right: calc(28px + env(safe-area-inset-right, 0px));
         }
     }
 

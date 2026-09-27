@@ -1,7 +1,7 @@
 ---
 ---
 
-<div class="led-o-wrap">
+<div class="led-o-wrap" data-led>
   <canvas
     class="led-o"
     width="41"
@@ -29,8 +29,9 @@
   const CANVAS = (N - 1) * STEP + SIZE;
   const DIM_AFTER = 48;
   const TOP_EPS = 8;
+  // mobile: morph scrubbed across this scroll window
+  const MORPH_SCROLL_END = 140;
 
-  // one-by-one cascade
   const STEP_MS = 55;
   const FLIP_MS = 70;
   const PROG_STEP_MS = 52;
@@ -55,7 +56,11 @@
     return [Number(m[1]), Number(m[2]), Number(m[3])];
   }
 
-  function lerp(
+  function lerp(a: number, b: number, t: number) {
+    return a + (b - a) * t;
+  }
+
+  function lerpRgb(
     a: [number, number, number],
     b: [number, number, number],
     t: number
@@ -71,32 +76,39 @@
     return Math.max(0, Math.min(1, v));
   }
 
+  function easeInOut(t: number) {
+    return t * t * (3 - 2 * t);
+  }
+
   function init(canvas: HTMLCanvasElement) {
-    const wrap = canvas.closest(".led-o-wrap");
+    const wrap = canvas.closest(".led-o-wrap") as HTMLElement | null;
+    const postMark = canvas.closest(".post-mark") as HTMLElement | null;
     const ctx = canvas.getContext("2d");
     if (!ctx || !wrap) return;
 
-    // Blog post sidebar mark → scroll progress meter
-    const isProgress = !!canvas.closest(".post-mark");
-
+    const isProgress = !!postMark;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const mobileMq = window.matchMedia("(max-width: 540px)");
+    const isMobile = () => mobileMq.matches;
+
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = CANVAS * dpr;
-    canvas.height = CANVAS * dpr;
-    canvas.style.width = `${CANVAS}px`;
-    canvas.style.height = `${CANVAS}px`;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     type Led = {
       i: number;
       j: number;
+      homeX: number;
+      homeY: number;
+      colX: number;
+      colY: number;
       x: number;
       y: number;
       inLogo: boolean;
+      inColumn: boolean;
       level: number;
       orderOn: number;
       orderOff: number;
       orderProg: number;
+      orderCol: number;
       bias: number;
       flickerPhase: number;
       progLit: boolean;
@@ -104,21 +116,28 @@
       flipping: boolean;
     };
 
-    // All 25 dots — logo uses O_MAP subset; progress uses every cell
     const leds: Led[] = [];
     for (let j = 0; j < N; j++) {
       for (let i = 0; i < N; i++) {
+        const homeX = SIZE / 2 + i * STEP;
+        const homeY = SIZE / 2 + j * STEP;
         leds.push({
           i,
           j,
-          x: SIZE / 2 + i * STEP,
-          y: SIZE / 2 + j * STEP,
+          homeX,
+          homeY,
+          // collapse into a single vertical column
+          colX: SIZE / 2,
+          colY: SIZE / 2 + j * STEP,
+          x: homeX,
+          y: homeY,
           inLogo: O_MAP[j][i] === 1,
+          inColumn: i === 2,
           level: OFF_LEVEL,
           orderOn: 0,
           orderOff: 0,
-          // top-left → right, then next row → bottom-right
           orderProg: j * N + i,
+          orderCol: j,
           bias: 0.9 + hash(i, j, 1) * 0.12,
           flickerPhase: hash(i, j, 2) * Math.PI * 2,
           progLit: false,
@@ -129,8 +148,8 @@
     }
 
     const logoLeds = leds.filter((led) => led.inLogo);
+    const columnLeds = leds.filter((led) => led.inColumn);
 
-    // Logo cascade: slightly broken orders (logo cells only)
     const byOn = [...logoLeds].sort(
       (a, b) => hash(a.i, a.j, 10) - hash(b.i, b.j, 10)
     );
@@ -144,7 +163,6 @@
       led.orderOff = idx;
     });
 
-    // home: dim-on-scroll
     let dimmed = false;
     let hover = false;
     let wantOn = false;
@@ -152,14 +170,17 @@
     let cascading = false;
     let booted = false;
 
-    // blog progress: logo → extinguish → meter → blank → ignite → logo
     type Phase = "logo" | "extinguish" | "meter" | "blank" | "ignite";
     let phase: Phase = "logo";
     let phaseStart = performance.now();
-    // meter chase: displayCount walks one-by-one toward targetCount
     let targetCount = 0;
     let displayCount = 0;
     let nextChaseAt = 0;
+
+    // mobile: 0 = full O grid, 1 = single column docked left (scroll-scrubbed)
+    let morphT = 0;
+    let colCanvas = false;
+    let spacer: HTMLElement | null = null;
 
     function themeColors() {
       const styles = getComputedStyle(document.documentElement);
@@ -189,11 +210,19 @@
     }
 
     function progressCount() {
+      if (isMobile() && isProgress) {
+        return Math.round(readingProgress() * N);
+      }
       return Math.round(readingProgress() * TOTAL);
     }
 
+    function meterTotal() {
+      return isMobile() && isProgress ? N : TOTAL;
+    }
+
     function updateProgressAria() {
-      const pct = Math.round((targetCount / TOTAL) * 100);
+      const total = meterTotal();
+      const pct = Math.round((targetCount / total) * 100);
       canvas.setAttribute(
         "aria-label",
         targetCount <= 0 ? "O mark" : `Reading progress ${pct}%`
@@ -207,36 +236,116 @@
     }
 
     function setMeterTarget(count: number) {
-      targetCount = Math.max(0, Math.min(TOTAL, count));
+      const total = meterTotal();
+      targetCount = Math.max(0, Math.min(total, count));
       updateProgressAria();
     }
 
     function snapMeter(count: number) {
-      targetCount = displayCount = Math.max(0, Math.min(TOTAL, count));
+      const total = meterTotal();
+      targetCount = displayCount = Math.max(0, Math.min(total, count));
       nextChaseAt = 0;
-      for (const led of leds) {
-        led.progLit = led.orderProg < displayCount;
-        led.level = led.progLit ? led.bias : OFF_LEVEL;
-        led.flipping = false;
+      if (isMobile() && isProgress) {
+        for (const led of leds) {
+          led.progLit = led.inColumn && led.orderCol < displayCount;
+          led.level = led.progLit ? led.bias : OFF_LEVEL;
+          led.flipping = false;
+        }
+      } else {
+        for (const led of leds) {
+          led.progLit = led.orderProg < displayCount;
+          led.level = led.progLit ? led.bias : OFF_LEVEL;
+          led.flipping = false;
+        }
       }
       updateProgressAria();
     }
 
-    // Advance one LED toward target — never spawn the whole grid at once
     function chaseMeter(now: number) {
       if (displayCount === targetCount) return;
       if (now < nextChaseAt) return;
 
+      const mobileCol = isMobile() && isProgress;
+
       if (displayCount < targetCount) {
-        const led = leds[displayCount];
-        if (led) startFlip(led, true, now);
+        if (mobileCol) {
+          const led = columnLeds[displayCount];
+          if (led) startFlip(led, true, now);
+        } else {
+          const led = leds[displayCount];
+          if (led) startFlip(led, true, now);
+        }
         displayCount += 1;
       } else {
         displayCount -= 1;
-        const led = leds[displayCount];
-        if (led) startFlip(led, false, now);
+        if (mobileCol) {
+          const led = columnLeds[displayCount];
+          if (led) startFlip(led, false, now);
+        } else {
+          const led = leds[displayCount];
+          if (led) startFlip(led, false, now);
+        }
       }
       nextChaseAt = now + PROG_STEP_MS;
+    }
+
+    function ensureSpacer() {
+      if (!postMark || spacer) return;
+      spacer = document.createElement("div");
+      spacer.className = "post-mark-spacer";
+      spacer.setAttribute("aria-hidden", "true");
+      postMark.parentElement?.insertBefore(spacer, postMark);
+    }
+
+    function setDocked(docked: boolean) {
+      if (!postMark || !isProgress || !isMobile()) {
+        postMark?.classList.remove("is-docked");
+        if (spacer) spacer.style.display = "none";
+        return;
+      }
+      if (docked) {
+        ensureSpacer();
+        if (spacer && !postMark.classList.contains("is-docked")) {
+          spacer.style.height = `${postMark.getBoundingClientRect().height}px`;
+        }
+        if (spacer) spacer.style.display = "block";
+      } else if (spacer) {
+        spacer.style.display = "none";
+      }
+      postMark.classList.toggle("is-docked", docked);
+    }
+
+    let canvasReady = false;
+    function applyCanvasSize(colMode: boolean) {
+      if (canvasReady && colMode === colCanvas) return;
+      colCanvas = colMode;
+      canvasReady = true;
+      const w = colMode ? SIZE : CANVAS;
+      const h = CANVAS;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      wrap.style.width = `${w}px`;
+      wrap.style.height = `${h}px`;
+    }
+
+    function applyMorphChrome() {
+      setDocked(morphT > 0.5);
+      applyCanvasSize(morphT > 0.72);
+    }
+
+    function syncMorphFromScroll() {
+      if (!isProgress || !isMobile()) {
+        morphT = 0;
+        setDocked(false);
+        applyCanvasSize(false);
+        return;
+      }
+      const raw = clamp01(window.scrollY / MORPH_SCROLL_END);
+      morphT = reduced ? (raw > 0.5 ? 1 : 0) : easeInOut(raw);
+      applyMorphChrome();
     }
 
     function enterPhase(next: Phase, now: number) {
@@ -279,7 +388,6 @@
           led.progLit = false;
           led.flipping = false;
         }
-        // start empty, then cascade toward current progress
         displayCount = 0;
         setMeterTarget(progressCount());
         nextChaseAt = now + 90;
@@ -295,8 +403,13 @@
       const { on, off } = themeColors();
       const t = now / 1000;
       const elapsed = now - cascadeStart;
+      const mobileCol = isProgress && isMobile();
 
-      ctx.clearRect(0, 0, CANVAS, CANVAS);
+      if (mobileCol) syncMorphFromScroll();
+
+      const colMode = mobileCol && morphT > 0.85;
+      const drawW = colMode ? SIZE : CANVAS;
+      ctx.clearRect(0, 0, drawW, CANVAS);
 
       let stillMoving = false;
 
@@ -305,6 +418,23 @@
       }
 
       for (const led of leds) {
+        // layout morph
+        if (mobileCol && morphT > 0) {
+          led.x = lerp(led.homeX, led.colX, morphT);
+          led.y = lerp(led.homeY, led.colY, morphT);
+        } else {
+          led.x = led.homeX;
+          led.y = led.homeY;
+        }
+
+        // side columns fade as we collapse
+        const sideFade =
+          mobileCol && !led.inColumn ? clamp01(1 - morphT * 1.35) : 1;
+
+        if (colMode && !led.inColumn) {
+          continue;
+        }
+
         if (isProgress && phase === "meter") {
           if (led.flipping) {
             const local = now - led.flipStart;
@@ -328,13 +458,13 @@
             }
           } else if (led.progLit) {
             const shimmer =
-              0.03 * Math.sin(t * (2.6 + hash(led.i, led.j, 9) * 2) + led.flickerPhase);
+              0.03 *
+              Math.sin(t * (2.6 + hash(led.i, led.j, 9) * 2) + led.flickerPhase);
             led.level = clamp01(led.bias + shimmer);
           } else {
             led.level = OFF_LEVEL;
           }
         } else if (!led.inLogo) {
-          // logo / home modes: hole cells stay dim
           led.level = OFF_LEVEL;
         } else if (reduced) {
           led.level = wantOn ? led.bias : OFF_LEVEL;
@@ -363,16 +493,48 @@
           }
         } else if (wantOn) {
           const shimmer =
-            0.035 * Math.sin(t * (2.8 + hash(led.i, led.j, 9) * 2.2) + led.flickerPhase);
+            0.035 *
+            Math.sin(t * (2.8 + hash(led.i, led.j, 9) * 2.2) + led.flickerPhase);
           led.level = clamp01(led.bias + shimmer);
         } else {
           led.level = OFF_LEVEL;
         }
 
-        const curved = Math.pow(clamp01(led.level), 0.7);
-        const [r, g, b] = lerp(off, on, curved);
+        // While morphing into the column, keep logo shape readable until sides fade.
+        let drawLevel = led.level * sideFade;
+        if (mobileCol && morphT > 0 && phase === "meter" && !led.inColumn) {
+          // side dots die with the morph; column takes over as meter
+          drawLevel *= clamp01(1 - morphT);
+        } else if (
+          mobileCol &&
+          morphT > 0.35 &&
+          phase === "meter" &&
+          led.inColumn
+        ) {
+          // once mostly collapsed, column is driven by progress (already in level)
+        } else if (
+          mobileCol &&
+          morphT > 0 &&
+          morphT < 0.55 &&
+          phase === "meter" &&
+          led.inLogo &&
+          !led.progLit
+        ) {
+          // early morph: hold logo brightness so it doesn't flash off
+          const shimmer =
+            0.03 *
+            Math.sin(t * (2.6 + hash(led.i, led.j, 9) * 2) + led.flickerPhase);
+          drawLevel = clamp01((led.bias + shimmer) * sideFade);
+        }
+
+        if (drawLevel <= 0.001) continue;
+
+        const curved = Math.pow(clamp01(drawLevel), 0.7);
+        const [r, g, b] = lerpRgb(off, on, curved);
+        const dx = led.x;
+        const dy = led.y;
         ctx.beginPath();
-        ctx.arc(led.x, led.y, SIZE / 2, 0, Math.PI * 2);
+        ctx.arc(dx, dy, SIZE / 2, 0, Math.PI * 2);
         ctx.fillStyle = `rgb(${r | 0}, ${g | 0}, ${b | 0})`;
         ctx.fill();
       }
@@ -410,6 +572,23 @@
       const atTop = window.scrollY <= TOP_EPS;
       const now = performance.now();
 
+      if (isMobile()) {
+        syncMorphFromScroll();
+        // Stay in logo while morph is mostly the O; meter once mostly column.
+        if (morphT < 0.45) {
+          if (phase !== "logo" && phase !== "ignite") {
+            enterPhase("blank", now);
+          }
+          return;
+        }
+        if (phase !== "meter") {
+          enterPhase("meter", now);
+          return;
+        }
+        setMeterTarget(progressCount());
+        return;
+      }
+
       if (atTop) {
         if (phase === "meter" || phase === "extinguish") {
           enterPhase("blank", now);
@@ -434,6 +613,9 @@
 
     if (isProgress) {
       window.addEventListener("scroll", onScrollProgress, { passive: true });
+      window.addEventListener("resize", () => {
+        syncMorphFromScroll();
+      }, { passive: true });
     } else {
       wrap.addEventListener("mouseenter", () => {
         hover = true;
@@ -445,6 +627,8 @@
       });
       window.addEventListener("scroll", onScrollHome, { passive: true });
     }
+
+    applyCanvasSize(false);
 
     if (reduced) {
       if (isProgress) {
@@ -460,6 +644,7 @@
           wrap.classList.add("is-dimmed");
           snapMeter(progressCount());
         }
+        syncMorphFromScroll();
       } else {
         dimmed = window.scrollY > DIM_AFTER;
         wantOn = !dimmed;
@@ -478,6 +663,7 @@
             } else {
               enterPhase("meter", performance.now());
             }
+            syncMorphFromScroll();
           } else {
             dimmed = window.scrollY > DIM_AFTER;
             if (!dimmed) startCascade(true);
@@ -521,6 +707,27 @@
 
     :global(.post-mark) .led-o-wrap {
       margin-bottom: 0;
+    }
+
+    :global(.post-mark.is-docked) {
+      position: fixed;
+      top: calc(20px + env(safe-area-inset-top, 0px));
+      left: calc(8px + env(safe-area-inset-left, 0px));
+      width: auto;
+      height: auto;
+      margin: 0;
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    :global(.post-mark.is-docked) .led-o-wrap {
+      pointer-events: auto;
+    }
+
+    :global(.post-mark-spacer) {
+      display: none;
+      width: 100%;
+      pointer-events: none;
     }
   }
 </style>
