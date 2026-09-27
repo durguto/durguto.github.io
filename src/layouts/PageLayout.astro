@@ -4,7 +4,6 @@ import ThemeScript from "./ThemeScript.astro";
 import Favicon from "./Favicon.astro";
 import ProfileNav from "../components/ProfileNav.astro";
 import DarkModeToggle from "../components/DarkModeToggle.astro";
-import ProgressiveBlur from "../components/ProgressiveBlur.astro";
 
 interface Props {
   current?: "home" | "writing";
@@ -36,8 +35,11 @@ const { current = "home" } = Astro.props;
         </div>
       </div>
 
+      <div class="footer-veil" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+      </div>
       <DarkModeToggle />
     </main>
-    <ProgressiveBlur />
   </body>
 </html>

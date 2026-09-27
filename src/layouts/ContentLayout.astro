@@ -4,7 +4,6 @@ import ThemeScript from "./ThemeScript.astro";
 import Favicon from "./Favicon.astro";
 import LedOMark from "../components/LedOMark.astro";
 import DarkModeToggle from "../components/DarkModeToggle.astro";
-import ProgressiveBlur from "../components/ProgressiveBlur.astro";
 import SineDivider from "../components/SineDivider.astro";
 
 export interface Props {
@@ -58,9 +57,12 @@ const formattedDate = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padSt
         </div>
       </div>
 
+      <div class="footer-veil" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+      </div>
       <DarkModeToggle />
     </main>
-    <ProgressiveBlur />
   </body>
 </html>
 
