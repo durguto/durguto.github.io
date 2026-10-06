@@ -250,9 +250,6 @@ module.exports = {
                         "--tw-prose-td-borders": "var(--border)",
                     },
                 },
-                newspaper: {
-                    css: {},
-                },
             }),
         },
     },

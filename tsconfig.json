@@ -1,6 +1,6 @@
 {
   "extends": "astro/tsconfigs/strict",
-  "display": "theme/newspaper",
+  "display": "durguto",
   "compilerOptions": {
     "types": ["astro/client"],
     "baseUrl": "."
