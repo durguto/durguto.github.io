@@ -36,10 +36,11 @@ const { meta, og, twitter } = getBlogPostMeta({
   pageUrl: pagePath ? new URL(pagePath, SITE_URL).toString() : undefined,
   authorName: MY_NAME,
   publishDate,
-  ogImageAbsoluteUrl,
-  ogImageAltText,
-  ogImageWidth,
-  ogImageHeight,
+  // posts without their own image share the site's OG card
+  ogImageAbsoluteUrl: ogImageAbsoluteUrl ?? `${SITE_URL}/images/og.png`,
+  ogImageAltText: ogImageAbsoluteUrl ? ogImageAltText : ogImageAltText ?? "Oğuzhan Durgut — durguto",
+  ogImageWidth: ogImageAbsoluteUrl ? ogImageWidth : 1200,
+  ogImageHeight: ogImageAbsoluteUrl ? ogImageHeight : 630,
   siteOwnerTwitterHandle: TWITTER_HANDLE,
   contentAuthorTwitterHandle: TWITTER_HANDLE,
 });

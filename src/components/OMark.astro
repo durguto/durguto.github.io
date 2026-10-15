@@ -1,0 +1,132 @@
+---
+---
+
+<div class="o-mark" data-omark>
+  <svg viewBox="9 20 82 60" role="img" aria-label="O mark"></svg>
+</div>
+
+<script>
+  import { markup, rowCount, SCALE } from "../lib/omark.mjs";
+
+  const clamp = (x: number, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+  const easeOut = (t: number) => 1 - Math.pow(1 - clamp(t), 3);
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // reading progress starts showing once the page has scrolled this far
+  const READ_FROM = 120;
+  let uid = 0;
+
+  function readingProgress() {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    return max > 0 ? clamp(window.scrollY / max) : 0;
+  }
+
+  function init(host: HTMLElement) {
+    const svg = host.querySelector("svg")!;
+    const id = `om${uid++}`;
+    // inside a post the mark doubles as a reading-progress meter
+    const isProgress = !!host.closest(".post-mark");
+    const n = rowCount(SCALE);
+
+    const t0 = performance.now();
+    let last = 0, clock = 0, sep = 0, v = 0;
+    let hovering = false;
+    let shown = 0; // smoothed reading progress
+    let reading = 0; // 0 = full logo, 1 = meter
+    let raf = 0;
+    let visible = true;
+
+    const draw = (now: number) => {
+      const t = (now - t0) / 1000;
+      const dt = Math.min(Math.max(t - last, 0), 0.1);
+      last = t;
+      // spring on the separation; substeps keep it stable at any frame rate
+      const steps = Math.max(1, Math.ceil(dt * 240));
+      for (let i = 0; i < steps; i++) {
+        v += (-170 * (sep - (hovering ? 6 : 0)) - 16 * v) * (dt / steps);
+        sep += v * (dt / steps);
+      }
+      clock += dt * (hovering ? 2.2 : 1);
+
+      let fill: ((k: number, count: number) => number) | undefined;
+      if (isProgress) {
+        const ease = reduced ? 1 : 1 - Math.exp(-dt * 10);
+        shown += (readingProgress() - shown) * ease;
+        reading += (clamp(window.scrollY / READ_FROM) - reading) * ease;
+        if (reading > 0.001) {
+          const p = shown, r = reading;
+          fill = (k, count) => 1 + (clamp(p * count - k) - 1) * r;
+        }
+      }
+
+      svg.innerHTML = markup(
+        SCALE,
+        {
+          sep,
+          t: clock,
+          grow: reduced ? 1 : easeOut((t - 0.15) / 1.1),
+          flowing: !reduced,
+          fill,
+          ghost: reading,
+        },
+        "currentColor",
+        id,
+      );
+    };
+
+    const loop = (now: number) => {
+      draw(now);
+      raf = visible && !document.hidden ? requestAnimationFrame(loop) : 0;
+    };
+    const wake = () => {
+      if (!raf && visible && !document.hidden) raf = requestAnimationFrame(loop);
+    };
+
+    if (reduced) {
+      // still frame; redraw only when something changes
+      draw(performance.now());
+      if (isProgress) window.addEventListener("scroll", () => requestAnimationFrame(draw), { passive: true });
+      return;
+    }
+
+    new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      wake();
+    }).observe(host);
+    document.addEventListener("visibilitychange", wake);
+    host.addEventListener("pointerenter", () => (hovering = true));
+    host.addEventListener("pointerleave", () => (hovering = false));
+    wake();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-omark]").forEach(init);
+</script>
+
+<style>
+  .o-mark {
+    display: flex;
+    align-items: center;
+    margin-bottom: 24px;
+    color: var(--text);
+  }
+
+  .o-mark svg {
+    display: block;
+    width: 56px;
+    height: 41px;
+    overflow: visible;
+  }
+
+  :global(.post-mark) .o-mark {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 540px) {
+    .o-mark {
+      margin-bottom: 12px;
+    }
+
+    :global(.post-mark) .o-mark {
+      margin-bottom: 0;
+    }
+  }
+</style>

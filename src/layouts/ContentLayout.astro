@@ -2,7 +2,7 @@
 import "../styles/global.css";
 import ThemeScript from "./ThemeScript.astro";
 import Favicon from "./Favicon.astro";
-import LedOMark from "../components/LedOMark.astro";
+import OMark from "../components/OMark.astro";
 import DarkModeToggle from "../components/DarkModeToggle.astro";
 import SineDivider from "../components/SineDivider.astro";
 
@@ -34,7 +34,7 @@ const formattedDate = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padSt
       <div class="post-shell">
         <aside class="post-mark">
           <a href="/" class="post-mark-home unset" aria-label="Home" title="Home">
-            <LedOMark />
+            <OMark />
           </a>
         </aside>
 
@@ -63,10 +63,77 @@ const formattedDate = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padSt
       </div>
       <DarkModeToggle />
     </main>
+    <div
+      class="read-progress"
+      role="progressbar"
+      aria-label="Reading progress"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="0"
+    >
+      <span></span>
+    </div>
   </body>
 </html>
 
+<script>
+  // Mobile: the mark scrolls away, so a hairline along the top keeps the reading progress.
+  const bar = document.querySelector<HTMLElement>(".read-progress");
+  if (bar) {
+    let queued = false;
+    const update = () => {
+      queued = false;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+      bar.style.setProperty("--p", String(p));
+      bar.classList.toggle("is-on", window.scrollY > 120);
+      bar.setAttribute("aria-valuenow", String(Math.round(p * 100)));
+    };
+    const queue = () => {
+      if (!queued) (queued = true), requestAnimationFrame(update);
+    };
+    window.addEventListener("scroll", queue, { passive: true });
+    window.addEventListener("resize", queue, { passive: true });
+    update();
+  }
+</script>
+
 <style>
+  .read-progress {
+    display: none;
+  }
+
+  @media (max-width: 540px) {
+    .read-progress {
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: calc(2px + env(safe-area-inset-top, 0px));
+      z-index: 5;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .read-progress.is-on {
+      opacity: 1;
+    }
+
+    .read-progress span {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 2px;
+      background: var(--text);
+      transform: scaleX(var(--p, 0));
+      transform-origin: left;
+      will-change: transform;
+    }
+  }
+
   .post-header {
     margin-top: 0;
     margin-bottom: calc(2.5 * var(--page-paragraph));

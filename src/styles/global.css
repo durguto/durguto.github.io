@@ -40,8 +40,6 @@
         --page-paragraph: 14px;
         --page-letter-spacing: -0.3px;
         --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-        --led-off: #c8c8c8;
-        --led-on: #111111;
 
         /* Tailwind bridge */
         --color-primary-main: 17 17 17;
@@ -72,8 +70,6 @@
         --syntax-blue: #6bb0ff;
         --background-overlay: rgb(17 17 17 / 0.4);
         --media-edge: rgb(255 255 255 / 0.15);
-        --led-off: #2a2a2a;
-        --led-on: #eeeeee;
 
         --color-primary-main: 238 238 238;
         --color-text-body: 238 238 238;
@@ -227,8 +223,8 @@
         position: absolute;
         top: 0;
         bottom: 0;
-        left: -69px;
-        width: 41px;
+        left: -84px;
+        width: 56px;
         pointer-events: none;
     }
 

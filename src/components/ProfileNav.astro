@@ -1,5 +1,5 @@
 ---
-import LedOMark from "./LedOMark.astro";
+import OMark from "./OMark.astro";
 
 interface Props {
   current?: "home" | "writing";
@@ -8,7 +8,7 @@ const { current = "home" } = Astro.props;
 ---
 
 <header class="profile-header">
-  <LedOMark />
+  <OMark />
   <nav class="profile-navigation" aria-label="Pages">
     <a href="/" class="profile-name" aria-current={current === "home" ? "page" : undefined}>
       Oğuzhan Durgut
